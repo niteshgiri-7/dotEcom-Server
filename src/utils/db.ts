@@ -1,18 +1,21 @@
-import mongoose from "mongoose";
+import mongoose, { Error } from "mongoose";
+const DB_URL = "mongodb://localhost:27017"
+const connectDB = async()=>{
+    try {
+        await mongoose.connect(DB_URL,{
+            dbName:"Ecommerce_TS"
+        })
+        console.log("Connected to Database successfully!")
+    } catch (error) {
+        if(error instanceof Error){
+            console.log(error.message);
+        }
+        else{
+            console.log("Unable to connect the Database");
+        }
 
-const url = "mongodb://localhost:27017";
+        process.exit(1);
+    }
+}
 
-export const connectDB = async () => {
-  try {
-    await mongoose.connect(url, {
-      dbName: "Ecommerce_TS",
-    });
-    console.log("Connected to the database successfully.");
-  } catch (error:unknown) {
-    if(error instanceof Error)
-    console.error("Failed to connect to the database:", error.message);
-    else
-    console.error("An unknown error occurred",error)
-    process.exit(1); 
-  }
-};
+export default connectDB;

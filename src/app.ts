@@ -1,15 +1,25 @@
 import express from "express";
-import { userRoute } from "./routes/userRoute.js";
-import { connectDB } from "./utils/db.js";
+import connectDB from "./utils/db.js";
+import { userRouter } from "./routes/userRoute.js";
+import errorMiddleWare from "./middlewares/errorMiddleWare.js";
 
 const app = express();
-const PORT = 8080;
 
+const port = 8080;
 connectDB();
 
 app.use(express.json());
-app.use("/api/v1/user", userRoute);
 
-app.listen(PORT, () => {
-  console.log(`Server up and running at port ${PORT}`);
+
+
+
+app.use("/api/v1/",userRouter)
+
+app.use(errorMiddleWare);
+
+app.listen(port, () => {
+  console.log(`server up and runnning at port ${port}`);
 });
+
+
+
