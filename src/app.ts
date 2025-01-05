@@ -2,6 +2,7 @@ import express from "express";
 import connectDB from "./utils/db.js";
 import { userRouter } from "./routes/userRoute.js";
 import errorMiddleWare from "./middlewares/errorMiddleWare.js";
+import { productRoute } from "./routes/productRoute.js";
 
 const app = express();
 
@@ -9,12 +10,15 @@ const port = 8080;
 connectDB();
 
 app.use(express.json());
+app.use(express.urlencoded({extended:true}))
 
 
 
 
-app.use("/api/v1/",userRouter)
+app.use("/api/v1/user",userRouter)
+app.use("/api/v1/products",productRoute);
 
+app.use("/uploads",express.static("uploads"));
 app.use(errorMiddleWare);
 
 app.listen(port, () => {

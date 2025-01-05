@@ -18,6 +18,7 @@ export interface UserType extends Document {
 }
 // Product model type
 export interface ProductType extends Document {
+  readonly id: number;
   name: string;
   photo: string;
   price: number;
@@ -25,8 +26,8 @@ export interface ProductType extends Document {
   category: string;
 }
 
-export type NewRequestBody = {
-  _id: string;
+export type NewUserRequestBody = {
+ readonly _id: string;
   name: string;
   email: string;
   photo: string;
@@ -35,16 +36,17 @@ export type NewRequestBody = {
   DOB: Date;
 };
 
-export type NewPoductRequestBody ={
+export type NewPoductRequestBody = {
+  readonly _id: string;
   name: string;
   photo: string;
   price: number;
   stock: number;
   category: string;
-}
+};
 
 export type ControllerType = (
   req: Request,
   res: Response,
   next: NextFunction
-) => Promise<void | Response<any, Record<string, any>>>
+) => Promise<void | Response<any, Record<string, any>>>;

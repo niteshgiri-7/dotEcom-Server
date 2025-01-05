@@ -1,32 +1,37 @@
 import mongoose from "mongoose";
 import { ProductType } from "../types/types.js";
 
-const productSchema = new mongoose.Schema({
-    name:{
-        type:String,
-        required:[true,"Enter product name"]
+const productSchema = new mongoose.Schema(
+  {
+    _id: {
+      type: Number,
+      required: [true, "Enter Product's Id"],
     },
-    photo:{
-        type:String,
-        required:[true,"Add Photo"]
+    name: {
+      type: String,
+      required: [true, "Enter product name"],
     },
-    price:{
-        type:Number,
-        required:[true,"Enter Price"]
+    photo: {
+      type: String,
+      required: [true, "Add Photo"],
     },
-    stock:{
-        type:Number,
-        required:[true,"Enter stock available"]
+    price: {
+      type: Number,
+      required: [true, "Enter Price"],
     },
-    category:{
-        type:String,
-        required:[true,"Enter category of the product"]
-    }
+    stock: {
+      type: Number,
+      required: [true, "Enter stock available"],
+    },
+    category: {
+      type: String,
+      required: [true, "Enter category of the product"],
+      trim:true,
+    },
+  },
+  {
+    timestamps: true,
+  }
+);
 
-
-},{
-    timestamps:true
-})
-
-export const Product = mongoose.model<ProductType>("Product",productSchema);
-
+export const Product = mongoose.model<ProductType>("Product", productSchema);
