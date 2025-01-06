@@ -1,8 +1,10 @@
 import express from "express";
 import connectDB from "./utils/db.js";
-import { userRouter } from "./routes/userRoute.js";
+
 import errorMiddleWare from "./middlewares/errorMiddleWare.js";
-import { productRoute } from "./routes/productRoute.js";
+
+import productRoute  from "./routes/productRoute.js";
+import  userRouter  from "./routes/userRoute.js";
 
 const app = express();
 
