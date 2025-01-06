@@ -1,8 +1,8 @@
 import mongoose, { Error } from "mongoose";
-const DB_URL = "mongodb://localhost:27017"
-const connectDB = async()=>{
+
+const connectDB = async(URL:string)=>{
     try {
-        await mongoose.connect(DB_URL,{
+        await mongoose.connect(URL,{
             dbName:"Ecommerce_TS"
         })
         console.log("Connected to Database successfully!")

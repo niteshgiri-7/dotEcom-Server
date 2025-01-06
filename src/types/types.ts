@@ -73,3 +73,9 @@ export type InvalidateCachePropsType = {
   order?:boolean;
   admin?:boolean;
 }
+
+export type CombinedCachedDataType ={
+  productOn_a_Page:Array<ProductType>;
+  totalProductsBasedOnFilter:Array<ProductType>;
+  totalPage:number;
+}

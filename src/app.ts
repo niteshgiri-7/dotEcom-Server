@@ -1,5 +1,6 @@
 import express from "express";
 import NodeCache from "node-cache";
+import { config } from "dotenv";
 
 import connectDB from "./utils/db.js";
 
@@ -7,16 +8,22 @@ import errorMiddleWare from "./middlewares/errorMiddleWare.js";
 
 import productRoute  from "./routes/productRoute.js";
 import  userRouter  from "./routes/userRoute.js";
+import morgan from "morgan";
+
+config({
+  path:"./.env"
+});
 
 const app = express();
 export const myCache = new NodeCache();
 
-const port = 8080;
-connectDB();
+const port = process.env.PORT;
+const URL:string = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL as string;
+connectDB(URL);
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
-
+app.use(morgan("tiny"));
 
 
 

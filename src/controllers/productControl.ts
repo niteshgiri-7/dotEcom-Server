@@ -1,8 +1,10 @@
-import { NextFunction, Request, Response } from "express";
+import { NextFunction, query, Request, Response } from "express";
 import { TryCatch } from "../utils/tryCatch.js";
 import {
   BaseQueryType,
+  CombinedCachedDataType,
   NewPoductRequestBody,
+  ProductType,
   SearchRequestQuery,
 } from "../types/types.js";
 import { Product } from "../models/product.js";
@@ -194,47 +196,83 @@ export const getProductsByFilter = TryCatch(
     const skip = (page - 1) * limit;
     const BaseQuery = <BaseQueryType>{};
 
-    if (search) {
-      BaseQuery.name = {
-        $regex: search,
-        $options: "i", //becomes case insensitive
-      };
+    let productOn_a_Page: Array<ProductType>,
+      totalProductsBasedOnFilter: Array<ProductType>,
+      totalPage: number;
+    let cachedData: CombinedCachedDataType;
+
+    //Object.keys(req.query) returns array of keys e.g:-['price','search',...]
+    //sort() sorts in alphabetical order
+    // then reducing that array to return an object with key value pair.
+    // using generic to indicate that accumulator will be an object(initially empty {}), ani tyo object ko key value pair duitai string ho
+    // then in req.query[key] asserting that tyo key chai searchReqQuery object jun cha teskai key ho
+
+    const queryKey = JSON.stringify(
+      Object.keys(req.query)
+        .sort()
+        .reduce<{ [key: string]: string }>((acc, key) => {
+          acc[key] = req.query[key as keyof SearchRequestQuery]!;
+          return acc;
+        }, {})
+    );
+
+    if (myCache.has(queryKey)) {
+      cachedData = JSON.parse(myCache.get(queryKey) as string);
+      ({ productOn_a_Page, totalProductsBasedOnFilter, totalPage } =
+        cachedData);
+    } else {
+      if (search) {
+        BaseQuery.name = {
+          $regex: search,
+          $options: "i", //becomes case insensitive
+        };
+      }
+
+      if (price) {
+        BaseQuery.price = {
+          $lte: Number(price),
+        };
+      }
+
+      if (category) BaseQuery.category = category;
+
+      [productOn_a_Page, totalProductsBasedOnFilter] = await Promise.all([
+        await Product.find(BaseQuery)
+          .sort(sort && { price: sort === "asc" ? 1 : -1 })
+          .limit(limit)
+          .skip(skip),
+        await Product.find(BaseQuery),
+      ]);
+
+      //if sort is defined then sort it by price.
+      // if sort is asc then sort by least price else highest price
+      //in first page returns 5 documents, in 2nd pg skips first 5 documents and returns next 5
+      // page-1:==>1,2,3,4,5
+      //page-2:===>6,7,8,9,10
+      //(pagination concept vancha yeslai)
+
+      //totalPage for the filteredProducts
+      // let's say for the given baseQuery,total filtered items are 15,then there would be 3 totalPages
+
+      if (productOn_a_Page.length === 0)
+        return next(new ErrorHandler("Products not found", 404));
+
+      totalPage = Math.ceil(totalProductsBasedOnFilter.length / limit);
+
+      myCache.set(
+        queryKey,
+        JSON.stringify({
+          productOn_a_Page,
+          totalProductsBasedOnFilter,
+          totalPage,
+        }),
+        3
+      );
     }
-
-    if (price) {
-      BaseQuery.price = {
-        $lte: Number(price),
-      };
-    }
-
-    if (category) BaseQuery.category = category;
-
-    const [products, totalFilteredProducts] = await Promise.all([
-      await Product.find(BaseQuery)
-        .sort(sort && { price: sort === "asc" ? 1 : -1 })
-        .limit(limit)
-        .skip(skip),
-      await Product.find(BaseQuery),
-    ]);
-    //if sort is defined then sort it by price.
-    // if sort is asc then sort by least price else highest price
-    //in first page returns 5 documents, in 2nd pg skips first 5 documents and returns next 5
-    // page-1:==>1,2,3,4,5
-    //page-2:===>6,7,8,9,10
-    //(pagination concept vancha yeslai)
-
-    //totalPage for the filteredProducts
-    // let's say for the given baseQuery,total filtered items are 15,then there would be 3 totalPages
-
-    if (products.length === 0)
-      return next(new ErrorHandler("Products not found", 404));
-
-    const totalPage = Math.ceil(totalFilteredProducts.length / limit);
-
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
-      totalPage: totalPage,
-      products,
+      totalPage,
+      productOn_a_Page,
     });
   }
 );
