@@ -67,3 +67,9 @@ export interface BaseQueryType {
   price?: { $lte: number };
   category?: string;
 }
+
+export type InvalidateCachePropsType = {
+  product?:boolean;
+  order?:boolean;
+  admin?:boolean;
+}
