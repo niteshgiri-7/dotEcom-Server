@@ -1,6 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { TryCatch } from "../utils/tryCatch.js";
-import { NewPoductRequestBody } from "../types/types.js";
+import {
+  BaseQueryType,
+  NewPoductRequestBody,
+  SearchRequestQuery,
+} from "../types/types.js";
 import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
@@ -94,8 +98,9 @@ export const updateProduct = TryCatch(
     const updates = req.body;
     const photoPath = req.file?.path;
     let updatedFields;
-    
-   if(Object.keys(updates).length===0) return next(new ErrorHandler("Nothing to update",400));
+
+    if (Object.keys(updates).length === 0)
+      return next(new ErrorHandler("Nothing to update", 400));
 
     const product = await Product.findById(productId);
     if (!product) return next(new ErrorHandler("Product not found", 404));
@@ -114,10 +119,10 @@ export const updateProduct = TryCatch(
     );
 
     res.status(200).json({
-      success:true,
-      message:`Product ${product._id} successfully updated`,
-      updateProduct
-    })
+      success: true,
+      message: `Product ${product._id} successfully updated`,
+      updateProduct,
+    });
   }
 );
 
@@ -131,16 +136,72 @@ export const getProductCategories = TryCatch(
   }
 );
 
-export const getLatestProducts = TryCatch(async (req, res, next) => {
-  const latestProducts = await Product.find({})
-    .sort({ createdAt: -1 })
-    .limit(5);
-  console.log(latestProducts);
-  if (!latestProducts) return next(new ErrorHandler("Products not found", 404));
+export const getLatestProducts = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const latestProducts = await Product.find({})
+      .sort({ createdAt: -1 })
+      .limit(5);
+    console.log(latestProducts);
+    if (!latestProducts)
+      return next(new ErrorHandler("Products not found", 404));
 
-  return res.status(200).json({ success: true, latestProducts });
-});
+    return res.status(200).json({ success: true, latestProducts });
+  }
+);
 
-export const getProductsByFilter = TryCatch(async (req, res, next) => {
-  res.send("hello");
-});
+export const getProductsByFilter = TryCatch(
+  async (
+    req: Request<{}, {}, {}, SearchRequestQuery>,
+    res: Response,
+    next: NextFunction
+  ) => {
+    const { price, search, sort, category } = req.query;
+    const page = Number(req.query.page) || 1;
+    const limit = Number(process.env.PRODUCT_PER_PAGE) || 5;
+    const skip = (page - 1) * limit;
+    const BaseQuery = <BaseQueryType>{};
+
+    if (search) {
+      BaseQuery.name = {
+        $regex: search,
+        $options: "i",
+      };
+    }
+
+    if (price) {
+      BaseQuery.price = {
+        $lte: Number(price),
+      };
+    }
+
+    if (category) BaseQuery.category = category;
+
+    const [products, totalFilteredProducts] = await Promise.all([
+      await Product.find(BaseQuery)
+        .sort(sort && { price: sort === "asc" ? 1 : -1 })
+        .limit(limit)
+        .skip(skip),
+      await Product.find(BaseQuery),
+    ]);
+    //if sort is defined then sort it by price.
+    // if sort is asc then sort by least price else highest price
+    //in first page returns 5 documents, in 2nd pg skips first 5 documents and returns next 5
+    // page-1:==>1,2,3,4,5
+    //page-2:===>6,7,8,9,10
+    //(pagination concept vancha yeslai)
+
+    //totalPage for the filteredProducts
+    // let's say for the given baseQuery,total filtered items are 15,then there would be 3 totalPages
+
+    if (products.length === 0)
+    return next(new ErrorHandler("Products not found", 404));
+
+    const totalPage = Math.ceil(totalFilteredProducts.length / limit);
+
+    res.status(200).json({
+      success: true,
+      totalPage: totalPage,
+      products,
+    });
+  }
+);

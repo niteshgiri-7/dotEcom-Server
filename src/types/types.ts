@@ -27,7 +27,7 @@ export interface ProductType extends Document {
 }
 
 export type NewUserRequestBody = {
- readonly _id: string;
+  readonly _id: string;
   name: string;
   email: string;
   photo: string;
@@ -50,3 +50,20 @@ export type ControllerType = (
   res: Response,
   next: NextFunction
 ) => Promise<void | Response<any, Record<string, any>>>;
+
+export type SearchRequestQuery = {
+  sort?: string;
+  page?: string;
+  price?: string;
+  search?: string;
+  category?:string;
+};
+
+export interface BaseQueryType {
+  name?: {
+    $regex: string;
+    $options: string;
+  };
+  price?: { $lte: number };
+  category?: string;
+}
