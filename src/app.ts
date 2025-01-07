@@ -9,6 +9,7 @@ import errorMiddleWare from "./middlewares/errorMiddleWare.js";
 import productRoute  from "./routes/productRoute.js";
 import  userRouter  from "./routes/userRoute.js";
 import morgan from "morgan";
+import orderRoute from "./routes/orderRoute.js";
 
 config({
   path:"./.env"
@@ -29,7 +30,7 @@ app.use(morgan("tiny"));
 
 app.use("/api/v1/user",userRouter)
 app.use("/api/v1/products",productRoute);
-
+app.use("/api/v1/order",orderRoute)
 app.use("/uploads",express.static("uploads"));
 app.use(errorMiddleWare);
 

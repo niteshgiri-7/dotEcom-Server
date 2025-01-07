@@ -45,6 +45,8 @@ export type NewPoductRequestBody = {
   category: string;
 };
 
+
+
 export type ControllerType = (
   req: Request,
   res: Response,
@@ -71,6 +73,7 @@ export interface BaseQueryType {
 export type InvalidateCachePropsType = {
   product?:boolean;
   order?:boolean;
+  userId?:string;
   admin?:boolean;
 }
 
