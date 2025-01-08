@@ -1,3 +1,5 @@
+import { Types } from "mongoose";
+
 
 export type ShippingInfoType={
   state:string;
@@ -6,12 +8,13 @@ export type ShippingInfoType={
   pinCode:number;
 }
 
-export type OrderItemsType ={
+export interface OrderItemsType {
     name:string;
     photo:string;
-    quantity:string;
+    quantity:string|number;
     price:number;
-    productId:string;
+    productId:string|number;
+
 }
 
  export interface NewOrderRequestBody  {

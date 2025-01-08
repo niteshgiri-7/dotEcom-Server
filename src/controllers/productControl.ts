@@ -147,7 +147,7 @@ export const updateProduct = TryCatch(
     return res.status(200).json({
       success: true,
       message: `Product ${product._id} successfully updated`,
-      updateProduct,
+      updatedProduct,
     });
   }
 );
@@ -198,8 +198,8 @@ export const getProductsByFilter = TryCatch(
 
     let productOn_a_Page: Array<ProductType>,
       totalProductsBasedOnFilter: Array<ProductType>,
-      totalPage: number;
-    let cachedData: CombinedCachedDataType;
+      totalPage: number,
+     cachedData: CombinedCachedDataType;
 
     //Object.keys(req.query) returns array of keys e.g:-['price','search',...]
     //sort() sorts in alphabetical order
@@ -266,7 +266,7 @@ export const getProductsByFilter = TryCatch(
           totalProductsBasedOnFilter,
           totalPage,
         }),
-        3
+        60
       );
     }
     return res.status(200).json({

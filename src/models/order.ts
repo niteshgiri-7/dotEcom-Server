@@ -43,13 +43,27 @@ const orderSchema = new mongoose.Schema(
     },
     orderedItems: [
       {
-        name: String,
-        photo: String,
-        quantity: Number,
-        price: Number,
+        name: {
+          type:String,
+          required:true,
+        },
+
+          photo:{
+            type: String,
+            required:true,
+        },
+        quantity:{
+          type:Number,
+          required:true
+        },
+        price:{
+          type:Number,
+          required:true
+        } ,
         productId: {
           type: Number,
           ref: "Product",
+          required:true
         },
       }
     ],

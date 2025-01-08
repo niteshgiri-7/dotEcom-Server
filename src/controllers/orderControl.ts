@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { NewOrderRequestBody } from "../types/orderTypes.js";
+import { NewOrderRequestBody, OrderItemsType } from "../types/orderTypes.js";
 import { TryCatch } from "../utils/tryCatch.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { Order } from "../models/order.js";
@@ -129,5 +129,23 @@ export const processOrder = TryCatch(async (req, res, next) => {
 
 export const cancelOrder = TryCatch(async (req, res, next) => {
 
+  const { userId } = req.params;
+  const { orderId } = req.query;
+   
+  const order = await Order.findById(orderId);
+  if(!order) return next(new ErrorHandler("Order not found",404));
 
+   if(order.orderedBy!==userId) return res.status(401).json({
+    success:false,
+    message:"Unauthorized"
+   })
+   if(order.status==="shipped" || order.status==="delivered") return next(new ErrorHandler(`Order already ${order.status}`,403));
+   await order.deleteOne({orderedBy:userId,_id:orderId});
+  
+  const {orderedItems}=order;
+    await updateStock(orderedItems,"increase");
+  return res.status(200).json({
+    success:true,
+    message:"Order successfully canceled"
+  })
 });
