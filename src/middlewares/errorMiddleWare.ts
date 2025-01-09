@@ -8,7 +8,7 @@ const errorMiddleWare = (error:ErrorHandler ,req:Request,res:Response,next:NextF
    error.statusCode||=500;
    
    if(error.name==="CastError") error.message="Invalid ID"
-
+   if(error.name==="ValidationError") error.message="Unexpected type of Data"
    return res.status(error.statusCode).json({
     message:error.message,
     success:false

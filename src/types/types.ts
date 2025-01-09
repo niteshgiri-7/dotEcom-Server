@@ -75,6 +75,8 @@ export type InvalidateCachePropsType = {
   order?:boolean;
   userId?:string;
   admin?:boolean;
+  coupon?:boolean;
+  couponCode?:string;
 }
 
 export type CombinedCachedDataType ={

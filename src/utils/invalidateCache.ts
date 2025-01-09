@@ -7,6 +7,8 @@ export const invalidateCache = async ({
   admin,
   order,
   userId,
+  coupon,
+  couponCode,
 }: InvalidateCachePropsType) => {
   if (product) {
     const productKeys: string[] = ["latest", "categories", "all-products"];
@@ -20,7 +22,14 @@ export const invalidateCache = async ({
 
   if (order) {
     const orderKeys:string[] = [`order-${userId}`, "all-orders"];
-    console.log(orderKeys)
     orderKeys.forEach((key) => myCache.del(key));
+  }
+
+  if(coupon && couponCode){
+    const couponKeys:string[] =[`coupon-${couponCode}`,"all-coupons"]
+     couponKeys.forEach(key=>myCache.del(key));
+  }
+  else if(coupon){
+    myCache.del("all-coupons")
   }
 };

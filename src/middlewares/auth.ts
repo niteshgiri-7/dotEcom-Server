@@ -1,4 +1,4 @@
-import { User } from "../models/User.js";
+import { User } from "../models/user.js";
 import { TryCatch } from "../utils/tryCatch.js";
 import ErrorHandler from "../utils/utility-class.js";
 
