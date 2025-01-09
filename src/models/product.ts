@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { ProductType } from "../types/types.js";
+import { ProductType } from "../types/controllerType.js";
 
 const productSchema = new mongoose.Schema(
   {

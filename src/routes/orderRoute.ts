@@ -10,7 +10,7 @@ import { isAdmin } from "../middlewares/auth.js";
 // req query is ?userId=
  orderRoute.get("/my-orders",getMyOrders);//TODO: use req.user object to identify the user
 
- orderRoute.get("/admin/all-orders",isAdmin,getAllOrders);//TODO: use req.user object to identify the user
+ orderRoute.get("/admin/all-orders/:userId",isAdmin,getAllOrders);//TODO: use req.user object to identify the user
 
 //to change the status of the order , route=>process/1234?orderId=
  orderRoute.patch("/update-status/:userId",isAdmin,processOrder);//TODO: use req.user object to identify the user

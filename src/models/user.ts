@@ -1,6 +1,7 @@
 import mongoose, { Document, mongo } from "mongoose";
 import validator from "validator";
-import { UserType } from "../types/types.js";
+import { UserType } from "../types/modelType.js";
+
 
 const userSchema = new mongoose.Schema(
   {

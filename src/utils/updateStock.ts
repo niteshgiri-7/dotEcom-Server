@@ -3,7 +3,7 @@
 import { log } from "console";
 import { Product } from "../models/product.js";
 import { OrderItemsType } from "../types/orderTypes.js";
-import { ProductType } from "../types/types.js";
+import { ProductType } from "../types/controllerType.js";
 
 export const updateStock = async (
   orderedItems: OrderItemsType[],

@@ -1,6 +1,6 @@
 import { myCache } from "../app.js";
 import { Product } from "../models/product.js";
-import { InvalidateCachePropsType } from "../types/types.js";
+import { InvalidateCachePropsType } from "../types/controllerType.js";
 
 export const invalidateCache = async ({
   product,

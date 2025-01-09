@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
-import { NewOrderRequestBody, OrderItemsType } from "../types/orderTypes.js";
-import { TryCatch } from "../utils/tryCatch.js";
-import ErrorHandler from "../utils/utility-class.js";
-import { Order } from "../models/order.js";
-import { invalidateCache } from "../utils/invalidateCache.js";
 import { myCache } from "../app.js";
+import { Order } from "../models/order.js";
+import { NewOrderRequestBody } from "../types/orderTypes.js";
+import { invalidateCache } from "../utils/invalidateCache.js";
+import { TryCatch } from "../utils/tryCatch.js";
 import { updateStock } from "../utils/updateStock.js";
+import ErrorHandler from "../utils/utility-class.js";
 
 export const addNewOrder = TryCatch(
   async (
@@ -120,7 +120,7 @@ export const processOrder = TryCatch(async (req, res, next) => {
 
   await invalidateCache({ admin: true, order: true, userId });
 
-  res.status(200).json({
+  return res.status(200).json({
     success: true,
     message: "Order processed successfully",
   });

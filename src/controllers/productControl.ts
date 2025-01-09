@@ -1,17 +1,14 @@
 import { NextFunction, query, Request, Response } from "express";
 import { TryCatch } from "../utils/tryCatch.js";
-import {
-  BaseQueryType,
-  CombinedCachedDataType,
-  NewPoductRequestBody,
-  ProductType,
-  SearchRequestQuery,
-} from "../types/types.js";
+
 import { Product } from "../models/product.js";
 import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
+import { NewPoductRequestBody } from "../types/requestType.js";
+import { BaseQueryType, SearchRequestQuery } from "../types/filterQueryType.js";
+import { CombinedCachedDataType, ProductType } from "../types/modelType.js";
 
 export const addNewProduct = TryCatch(
   async (
@@ -200,6 +197,7 @@ export const getProductsByFilter = TryCatch(
       totalProductsBasedOnFilter: Array<ProductType>,
       totalPage: number,
      cachedData: CombinedCachedDataType;
+
 
     //Object.keys(req.query) returns array of keys e.g:-['price','search',...]
     //sort() sorts in alphabetical order

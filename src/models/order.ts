@@ -3,23 +3,27 @@ import mongoose from "mongoose";
 const orderSchema = new mongoose.Schema(
   {
     shippingInfo: {
-      state: {
-        type: String,
-        required: [true, "State required"],
+      type: {
+        state: {
+          type: String,
+          required: [true, "State required"],
+        },
+        city: {
+          type: String,
+          required: [true, "City required"],
+        },
+        pinCode: {
+          type: Number,
+          required: [true, "Pin Code required"],
+        },
+        country: {
+          type: String,
+          required: [true, "Country required"],
+        },
       },
-      city: {
-        type: String,
-        required: [true, "city required"],
-      },
-      pinCode: {
-        type: Number,
-        required: [true, "Pin Code required"],
-      },
-      country: {
-        type: String,
-        required: [true, "Country required"],
-      },
+      required: [true, "Shipping information is required"], // This makes the entire object required
     },
+    
     status: {
       type: String,
       enum: ["pending payment","processing","shipped","delivered"],
