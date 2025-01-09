@@ -1,4 +1,4 @@
-import { OrderType, ProductType, UserType } from "./modelType.js";
+import { OrderType, ProductType} from "./modelType.js";
 
 export type NewUserRequestBody = {
   readonly _id: string;
@@ -19,6 +19,13 @@ export type NewPoductRequestBody = {
   category: string;
 };
 
+
+export type inventStatType = {
+  name:string;
+  count:number;
+  percentage?:number;
+};
+
 export type StatsType={
   revenueGrowth:number;
   counts:{
@@ -33,14 +40,16 @@ export type StatsType={
   lastSixMnthsStats?:{
     ordersCreated:number[],
     revenueGenerated:number[]
-  }
+  };
+  inventoryStats:inventStatType[]
 }
 
 declare global {
   namespace Express{
     interface Request{
       stats:StatsType;
-      lastSixMnthsOrders:OrderType[]
+      lastSixMnthsOrders:OrderType[];
+      allProducts :ProductType[];
     }
   }
 }

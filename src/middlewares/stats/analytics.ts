@@ -70,6 +70,8 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
       $lte:moment()
     }
   })
+   
+  
 
   const [
     thisMonthProducts,
@@ -81,7 +83,8 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
     productCount,
     userCount,//total number of users in the system
     allOrders,//total of each individual orders to calculate the total revenue generated
-    lastSixMnthsOrders
+    lastSixMnthsOrders,
+    allProducts
   ] = await Promise.all([
     getThisMonthProducts,
     getLastMonthProducts,
@@ -91,8 +94,9 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
     getLastMonthUsers,
     Product.countDocuments(),
     User.countDocuments(),
-    Order.find({}).select("total"),
-    getLastSixMonthsOrders
+    Order.find({}).select({total:1,status:1}),
+    getLastSixMonthsOrders,
+    Product.find({})
   ]);
 
    // delivered vako orders lai matra linu paryo to check revenue since other orders not delivered yet might get cancelled
@@ -103,7 +107,6 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
   const lastMonthRevenue = lastMonthOrders
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
-
     const totalRevenue = allOrders
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
@@ -138,5 +141,6 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
 
   req.stats = stats;
   req.lastSixMnthsOrders=lastSixMnthsOrders;//to calcuate last 6 mnths stats in next middleware
+  req.allProducts=allProducts;//used in getInventory to find percentage occupied by each categories products
   next();
 });
