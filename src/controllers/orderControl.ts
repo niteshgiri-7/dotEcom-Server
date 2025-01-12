@@ -41,7 +41,7 @@ export const addNewOrder = TryCatch(
     );
     if (!isSuccess)
       return next(new ErrorHandler("Product not found to place order", 404));
-    await invalidateCache({ product: true, order: true, userId: orderedBy });
+    await invalidateCache({ product: true, order: true, userId: orderedBy,admin:true });
 
     res.status(200).json({
       success: true,
@@ -118,7 +118,7 @@ export const processOrder = TryCatch(async (req, res, next) => {
 
   await order.save();
 
-  await invalidateCache({ admin: true, order: true, userId });
+   invalidateCache({ admin: true, order: true, userId:userId });
 
   return res.status(200).json({
     success: true,
@@ -144,6 +144,7 @@ export const cancelOrder = TryCatch(async (req, res, next) => {
   
   const {orderedItems}=order;
     await updateStock(orderedItems,"increase");
+    invalidateCache({order:true,admin:true,userId:userId})
   return res.status(200).json({
     success:true,
     message:"Order successfully canceled"

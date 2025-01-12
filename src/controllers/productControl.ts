@@ -46,7 +46,7 @@ export const addNewProduct = TryCatch(
       stock,
     });
     // invalidating the cache as soon as a new product is created
-    await invalidateCache({ product: true });
+    await invalidateCache({ product: true ,admin:true });
 
     return res.status(200).json({
       success: true,
@@ -105,7 +105,7 @@ export const deleteProduct = TryCatch(
     rm(product.photo, () => {
       console.log("photo deleted");
     });
-    await invalidateCache({ product: true });
+    await invalidateCache({ product: true ,admin:true});
 
     return res.status(200).json({
       success: true,
@@ -139,7 +139,7 @@ export const updateProduct = TryCatch(
       { $set: updatedFields },
       { runValidators: true }
     );
-    await invalidateCache({ product: true });
+    await invalidateCache({ product: true ,admin:true});
 
     return res.status(200).json({
       success: true,

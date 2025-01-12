@@ -5,8 +5,9 @@ import { User } from "../../models/user.js";
 import { StatsType } from "../../types/requestType.js";
 import { calculatePercentage } from "../../utils/calculatePercentage.js";
 import { TryCatch } from "../../utils/tryCatch.js";
+import { OrderType } from "../../types/modelType.js";
 
-export const fingGrowthRate = TryCatch(async (req, res, next) => {
+export const findGrowthRate = TryCatch(async (req, res, next) => {
   const today = new Date();
 
   const thisMonth = {
@@ -18,8 +19,8 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
     start: new Date(today.getFullYear(), today.getMonth() - 1, 1),
     end: new Date(today.getFullYear(), today.getMonth(), 0),
   };
- 
-  const sixMonthsAgo = moment().subtract(6,"months");
+
+  const sixMonthsAgo = moment().subtract(6, "months");
 
   const getThisMonthProducts = Product.find({
     createdAt: {
@@ -62,16 +63,19 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
       $lte: lastMonth.end,
     },
   }).exec();
-  
+
   // last six months lai herda : kun month maa (kati order create va and kati reveneue generate va) vanera check garnalai
   const getLastSixMonthsOrders = Order.find({
-    createdAt:{
-      $gte:sixMonthsAgo,
-      $lte:moment()
-    }
-  })
-   
-  
+    createdAt: {
+      $gte: sixMonthsAgo,
+      $lte: moment(),
+    },
+  });
+
+  const getLatestTransactions = Order.find({})
+    .sort({ createdAt: -1 })
+    .select(["status", "discount", "orderedItems", "total"])
+    .limit(4).lean();
 
   const [
     thisMonthProducts,
@@ -81,10 +85,12 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
     thisMonthUsers,
     lastMonthUsers,
     productCount,
-    userCount,//total number of users in the system
-    allOrders,//total of each individual orders to calculate the total revenue generated
+    userCount, //total number of users in the system
+    allOrders, //total of each individual orders to calculate the total revenue generated
     lastSixMnthsOrders,
-    allProducts
+    allProducts,
+    allUsersGender,
+    latestTransactions,
   ] = await Promise.all([
     getThisMonthProducts,
     getLastMonthProducts,
@@ -94,12 +100,14 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
     getLastMonthUsers,
     Product.countDocuments(),
     User.countDocuments(),
-    Order.find({}).select({total:1,status:1}),
+    Order.find({}).select({ total: 1, status: 1 }),
     getLastSixMonthsOrders,
-    Product.find({})
+    Product.find({}),
+    User.find({}).select("gender"),
+    getLatestTransactions,
   ]);
 
-   // delivered vako orders lai matra linu paryo to check revenue since other orders not delivered yet might get cancelled
+  // delivered vako orders lai matra linu paryo to check revenue since other orders not delivered yet, might get cancelled
   const thisMonthRevenue = thisMonthOrders
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
@@ -107,22 +115,46 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
   const lastMonthRevenue = lastMonthOrders
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
-    const totalRevenue = allOrders
+  const totalRevenue = allOrders
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
 
-    const counts = {
-        user:userCount,
-        product:productCount,
-        order:allOrders.length,
-        totalRevenue:totalRevenue,
+  const counts = {
+    user: userCount,
+    product: productCount,
+    order: allOrders.length,
+    totalRevenue: totalRevenue,
+  };
+
+  const gender = allUsersGender.reduce(
+    (obj, user) => {
+      if (user.gender === "male") obj.male++;
+      else obj.female++;
+      return obj;
+    },
+    { male: 0, female: 0 }
+  );
+
+  const genderRatio = {
+    male: Number(((gender.male / userCount) * 100).toFixed(0)),
+    female: Number(((gender.female / userCount) * 100).toFixed(0)),
+  };
+
+  const modifiedTransaction  = latestTransactions.map((transaction:OrderType)=>{
+    const {orderedItems,...rest} = transaction;
+    return {
+      ...rest,
+      quantity:transaction.orderedItems.length
     }
- 
+  })
+
+  
+  
 
   const stats: StatsType = {
-    counts:counts,
+    counts: counts,
     revenueGrowth: calculatePercentage(lastMonthRevenue, thisMonthRevenue),
-    
+
     productsChangeRate: calculatePercentage(
       lastMonthProducts.length,
       thisMonthProducts.length
@@ -137,10 +169,12 @@ export const fingGrowthRate = TryCatch(async (req, res, next) => {
       lastMonthOrders.length,
       thisMonthOrders.length
     ),
+    genderRatio: genderRatio,
+    latestTransactions:modifiedTransaction,
   };
 
   req.stats = stats;
-  req.lastSixMnthsOrders=lastSixMnthsOrders;//to calcuate last 6 mnths stats in next middleware
-  req.allProducts=allProducts;//used in getInventory to find percentage occupied by each categories products
+  req.lastSixMnthsOrders = lastSixMnthsOrders; //to calcuate last 6 mnths stats in next middleware
+  req.allProducts = allProducts; //used in getInventory to find percentage occupied by each categories products
   next();
 });

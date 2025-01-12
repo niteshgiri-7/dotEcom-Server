@@ -35,7 +35,7 @@ export const getInventoryStats = TryCatch(async (req, res, next) => {
   });
   //adding occupied percentage by each categories
   inventStat.forEach((inventory) => {
-    inventory.percentage = Number(((inventory.count / products.length) * 100).toFixed(0));
+    inventory.percentage = calculatePercentage(inventory.count,products.length);
   });
 
   req.stats.inventoryStats = inventStat;

@@ -41,7 +41,12 @@ export type StatsType={
     ordersCreated:number[],
     revenueGenerated:number[]
   };
-  inventoryStats:inventStatType[]
+  inventoryStats?:inventStatType[],
+  genderRatio:{
+    male:number;
+    female:number;
+  };
+  latestTransactions:Omit<OrderType,"orderedItems">[]
 }
 
 declare global {

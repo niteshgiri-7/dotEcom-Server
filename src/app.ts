@@ -11,7 +11,7 @@ import  userRouter  from "./routes/userRoute.js";
 import morgan from "morgan";
 import orderRoute from "./routes/orderRoute.js";
 import paymentRoute from "./routes/paymentRoute.js";
-import statsRoute from "./routes/stats.js";
+import statsRoute from "./routes/statsRoute.js";
 
 config({
   path:"./.env"

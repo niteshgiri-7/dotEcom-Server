@@ -1,6 +1,6 @@
 import { myCache } from "../app.js";
 import { Product } from "../models/product.js";
-import { InvalidateCachePropsType } from "../types/controllerType.js";
+import { InvalidateCachePropsType } from "../types/invalidateCacheType.js";
 
 export const invalidateCache = async ({
   product,
@@ -31,5 +31,10 @@ export const invalidateCache = async ({
   }
   else if(coupon){
     myCache.del("all-coupons")
+  }
+   
+  if(admin){
+    myCache.del("chart-stats");
+    myCache.del("admin-stats");
   }
 };

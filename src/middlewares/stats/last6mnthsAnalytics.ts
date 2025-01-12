@@ -16,7 +16,7 @@ export const getLastSixMnthsStats = TryCatch(
     lastSixMnthsOrders.forEach((order) => {
       const createdAt = order.createdAt;
       const monthDiff = moment().diff(moment(createdAt), "months");
-
+      
       ordersCreated[ordersCreated.length - 1 - monthDiff] += 1;
       revenueGenerated[revenueGenerated.length - 1 - monthDiff] += order.total;
     });
