@@ -13,6 +13,7 @@ const connectDB = async(URL:string)=>{
         else{
             console.log("Unable to connect the Database");
         }
+        console.log(error)
 
         process.exit(1);
     }
