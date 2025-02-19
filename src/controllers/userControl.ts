@@ -7,9 +7,9 @@ import { invalidateCache } from "../utils/invalidateCache.js";
 
 export const signUp = TryCatch(
   async (req: Request<{}, {}, NewUserRequestBody>, res: Response, next: NextFunction): Promise<void> => {
-    const { _id ,name,DOB,email,gender,photo,role} = req.body;
+    const {name,DOB,email,gender,photo,role} = req.body;
 
-    const user = await User.findById(_id);
+    const user = await User.findOne({email:email});
     if (user) {
       return next(new ErrorHandler("User already exists", 400));
     }
@@ -23,3 +23,13 @@ export const signUp = TryCatch(
     });
   }
 );
+
+export const getAllCustomers = TryCatch(async(req:Request,res:Response,next:NextFunction)=>{
+  const allCustomers = await User.find({});
+  if(!allCustomers) return next(new ErrorHandler("No customers Found",404));
+
+  res.status(200).json({
+    success:true,
+    allCustomers
+  })
+})

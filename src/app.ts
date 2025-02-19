@@ -1,5 +1,6 @@
 import express from "express";
 import NodeCache from "node-cache";
+import cors from "cors";
 import { config } from "dotenv";
 
 import connectDB from "./utils/db.js";
@@ -12,6 +13,7 @@ import morgan from "morgan";
 import orderRoute from "./routes/orderRoute.js";
 import paymentRoute from "./routes/paymentRoute.js";
 import statsRoute from "./routes/statsRoute.js";
+import { CorsOptions } from "cors";
 
 config({
   path:"./.env"
@@ -23,6 +25,15 @@ export const myCache = new NodeCache();
 const port = process.env.PORT;
 const URL:string = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL as string;
 connectDB(URL);
+
+const corsOption:CorsOptions={
+  origin:process.env.DOMAIN,
+  methods:["GET","POST","PUT","DELETE","OPTIONS"],
+  allowedHeaders:["Content-Type","Authorization"],
+  credentials:true,
+}
+
+app.use(cors(corsOption));
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))

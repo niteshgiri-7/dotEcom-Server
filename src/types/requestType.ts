@@ -1,7 +1,7 @@
 import { OrderType, ProductType} from "./modelType.js";
 
 export type NewUserRequestBody = {
-  readonly _id: string;
+  readonly _id?: string;
   name: string;
   email: string;
   photo: string;
@@ -26,17 +26,22 @@ export type inventStatType = {
   percentage?:number;
 };
 
+export type OverViewCountType ={
+  name:string;
+  count:number;
+  rate:number;
+}
+
+export interface ILatestTransactions{
+  _id:string;
+  status:"pending payment"|"delivered"|"shipped"|"processing";
+  discount?:number|null|undefined;
+  total:number;
+  quantity:number;
+}
+
 export type StatsType={
-  revenueGrowth:number;
-  counts:{
-    totalRevenue:number;
-    product:number;
-    user:number;
-    order:number;
-  }
-  productsChangeRate:number;
-  usersGrowthRate:number;
-  ordersChangeRate:number;
+   overviewCount:OverViewCountType[]
   lastSixMnthsStats?:{
     ordersCreated:number[],
     revenueGenerated:number[]
@@ -46,7 +51,7 @@ export type StatsType={
     male:number;
     female:number;
   };
-  latestTransactions:Omit<OrderType,"orderedItems">[]
+  latestTransactions:ILatestTransactions[]
 }
 
 declare global {

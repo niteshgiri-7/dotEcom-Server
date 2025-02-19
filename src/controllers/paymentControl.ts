@@ -1,11 +1,10 @@
 import { NextFunction, Request, Response } from "express";
-import { TryCatch } from "../utils/tryCatch.js";
-import { NewCouponRequestBody } from "../types/couponType.js";
-import ErrorHandler from "../utils/utility-class.js";
-import { Coupon } from "../models/coupon.js";
-import { log } from "console";
 import { myCache } from "../app.js";
+import { Coupon } from "../models/coupon.js";
+import { NewCouponRequestBody } from "../types/couponType.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
+import { TryCatch } from "../utils/tryCatch.js";
+import ErrorHandler from "../utils/utility-class.js";
 
 export const CreateNewCoupon = TryCatch(
   async (
@@ -13,16 +12,11 @@ export const CreateNewCoupon = TryCatch(
     res: Response,
     next: NextFunction
   ) => {
-    const { code, discountedAmount } = req.body;
-
-    if (!code || !discountedAmount)
-      return next(new ErrorHandler("Incomplete Data", 400));
-
-    const coupon = await Coupon.findOne({ code: code });
-
+    const coupon  = await Coupon.findOne({ code: req.body.code });
+     
     if (coupon)
       return next(new ErrorHandler("Coupon Code already exists", 409));
-
+    
     const newCoupon = await Coupon.create(req.body);
      invalidateCache({coupon:true})
     return res.status(200).json({
@@ -92,3 +86,4 @@ export const deleteCoupon = TryCatch(async (req, res, next) => {
     message: `Coupon ${coupon.code} deleted successfully`,
   });
 });
+

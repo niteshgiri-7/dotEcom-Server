@@ -2,7 +2,7 @@ import moment from "moment";
 import { Order } from "../../models/order.js";
 import { Product } from "../../models/product.js";
 import { User } from "../../models/user.js";
-import { StatsType } from "../../types/requestType.js";
+import { ILatestTransactions, StatsType } from "../../types/requestType.js";
 import { calculatePercentage } from "../../utils/calculatePercentage.js";
 import { TryCatch } from "../../utils/tryCatch.js";
 import { OrderType } from "../../types/modelType.js";
@@ -119,13 +119,6 @@ export const findGrowthRate = TryCatch(async (req, res, next) => {
     .filter((order) => order.status === "delivered")
     .reduce((total, order) => (total += order.total), 0);
 
-  const counts = {
-    user: userCount,
-    product: productCount,
-    order: allOrders.length,
-    totalRevenue: totalRevenue,
-  };
-
   const gender = allUsersGender.reduce(
     (obj, user) => {
       if (user.gender === "male") obj.male++;
@@ -139,40 +132,52 @@ export const findGrowthRate = TryCatch(async (req, res, next) => {
     male: Number(((gender.male / userCount) * 100).toFixed(0)),
     female: Number(((gender.female / userCount) * 100).toFixed(0)),
   };
-
-  const modifiedTransaction  = latestTransactions.map((transaction:OrderType)=>{
-    const {orderedItems,...rest} = transaction;
+  const modifiedTransaction  = latestTransactions.map((transaction)=>{
+    const {orderedItems,_id,...rest} = transaction;
     return {
       ...rest,
+      _id:_id.toString(),
       quantity:transaction.orderedItems.length
     }
   })
 
   
-  
 
   const stats: StatsType = {
-    counts: counts,
-    revenueGrowth: calculatePercentage(lastMonthRevenue, thisMonthRevenue),
-
-    productsChangeRate: calculatePercentage(
-      lastMonthProducts.length,
-      thisMonthProducts.length
-    ),
-
-    usersGrowthRate: calculatePercentage(
-      lastMonthUsers.length,
-      thisMonthUsers.length
-    ),
-
-    ordersChangeRate: calculatePercentage(
-      lastMonthOrders.length,
-      thisMonthOrders.length
-    ),
+    // counts: counts,
+    overviewCount:[{
+      name:"Product",
+      rate:calculatePercentage(
+        lastMonthProducts.length,
+        thisMonthProducts.length
+      ),
+      count:productCount,
+    },
+     {
+      name:"User",
+      rate:calculatePercentage(
+        lastMonthUsers.length,
+        thisMonthUsers.length
+      ),
+      count:userCount
+     },
+     {
+      name:"Orders",
+      rate:calculatePercentage(
+        lastMonthOrders.length,
+        thisMonthOrders.length
+      ),
+      count:allOrders.length
+     },
+     {
+      name:"Revenue",
+      rate:calculatePercentage(lastMonthRevenue, thisMonthRevenue),
+      count:totalRevenue
+     },
+  ],
     genderRatio: genderRatio,
     latestTransactions:modifiedTransaction,
   };
-
   req.stats = stats;
   req.lastSixMnthsOrders = lastSixMnthsOrders; //to calcuate last 6 mnths stats in next middleware
   req.allProducts = allProducts; //used in getInventory to find percentage occupied by each categories products

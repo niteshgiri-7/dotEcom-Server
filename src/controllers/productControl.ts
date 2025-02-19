@@ -17,13 +17,13 @@ export const addNewProduct = TryCatch(
     next: NextFunction
   ) => {
     console.log("from controller", req.body);
-    const { _id, category, name, price, stock } = req.body;
+    const {category, name, price, stock } = req.body;
 
-    if (!_id) return next(new ErrorHandler("invalid Id", 400));
 
     if (!req.file) return next(new ErrorHandler("Please Add Photo", 400));
 
-    const productExist = await Product.findById(_id);
+    const productExist = await Product.findOne({name:name})
+   
     if (productExist) {
       rm(req.file.path, () =>
         console.log("duplicate file removed since already exists")
@@ -38,7 +38,6 @@ export const addNewProduct = TryCatch(
     }
 
     const savedProduct = await Product.create({
-      _id: _id,
       category: category.toLowerCase(),
       name,
       photo: req.file.path,
@@ -65,6 +64,7 @@ export const getAllProducts = TryCatch(
       Products = await Product.find({}).select({
         createdAt: 0,
         updatedAt: 0,
+        __v:0
       });
       if (Products.length === 0)
         return next(new ErrorHandler("No Products Found", 404));
@@ -133,14 +133,14 @@ export const updateProduct = TryCatch(
         console.log("Old photo deleted");
       });
     }
-
+    console.log("wait");
     const updatedProduct = await Product.findByIdAndUpdate(
       productId,
       { $set: updatedFields },
-      { runValidators: true }
+      {new:true, runValidators: true }
     );
-    await invalidateCache({ product: true ,admin:true});
-
+     invalidateCache({ product: true ,admin:true});
+    console.log("sending response")
     return res.status(200).json({
       success: true,
       message: `Product ${product._id} successfully updated`,

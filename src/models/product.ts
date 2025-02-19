@@ -1,12 +1,9 @@
 import mongoose from "mongoose";
-import { ProductType } from "../types/controllerType.js";
+import { ProductType } from "../types/modelType.js";
+
 
 const productSchema = new mongoose.Schema(
   {
-    _id: {
-      type: Number,
-      required: [true, "Enter Product's Id"],
-    },
     name: {
       type: String,
       required: [true, "Enter product name"],
@@ -31,7 +28,6 @@ const productSchema = new mongoose.Schema(
   },
   {
     timestamps: true,
-    _id:false,
   }
 );
 

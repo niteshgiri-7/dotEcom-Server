@@ -3,12 +3,8 @@ import validator from "validator";
 import { UserType } from "../types/modelType.js";
 
 
-const userSchema = new mongoose.Schema(
+const userSchema = new mongoose.Schema<UserType>(
   {
-    _id: {
-      type: String,
-      required: [true, "Enter id"],
-    },
     name: {
       type: String,
       required: [true, "Enter name"],
@@ -58,4 +54,4 @@ userSchema.virtual("age").get(function (this: UserType) {
   return age;
 });
 
-export const User = mongoose.model<UserType>("User", userSchema);
+export const User = mongoose.model("User", userSchema);

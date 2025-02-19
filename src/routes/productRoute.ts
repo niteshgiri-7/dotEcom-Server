@@ -14,7 +14,7 @@ import { singleUpload } from "../middlewares/multer.js";
 
 const productRoute = express.Router(); //product's route is -> /api/v1/products/...
 
-productRoute.post("/add/:userId", isAdmin, singleUpload, addNewProduct);
+productRoute.post("/add/:userId", singleUpload, addNewProduct);
 
 productRoute.get("/all", getAllProducts);
 
@@ -29,7 +29,7 @@ productRoute.get("/filter", getProductsByFilter);
 productRoute
   .route("/:userId")
   .get(getProductDetails)
-  .delete(isAdmin, deleteProduct)
-  .put(isAdmin, singleUpload, updateProduct);
+  .delete( deleteProduct)
+  .put( singleUpload, updateProduct);
 
 export default productRoute;

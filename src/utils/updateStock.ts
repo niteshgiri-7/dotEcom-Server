@@ -1,9 +1,7 @@
 // to update the stock of the product as new orders get placed
 
-import { log } from "console";
 import { Product } from "../models/product.js";
 import { OrderItemsType } from "../types/orderTypes.js";
-import { ProductType } from "../types/controllerType.js";
 
 export const updateStock = async (
   orderedItems: OrderItemsType[],
@@ -12,9 +10,10 @@ export const updateStock = async (
   try {
     for (let i = 0; i < orderedItems.length; i++) {
       const order = orderedItems[i];
-      const product: ProductType | null = await Product.findById(
+      const product = await Product.findById(
         order.productId
       );
+      console.log(product)
       if (!product) throw new Error("product not found");
       operation === "decrease"
         ? (product.stock -= Number(order.quantity))
@@ -23,6 +22,7 @@ export const updateStock = async (
       return true;
     }
   } catch (error) {
+    console.log(error)
     return false;
   }
 };

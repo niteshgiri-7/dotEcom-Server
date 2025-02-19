@@ -1,3 +1,5 @@
+import { Document, ObjectId } from "mongoose";
+
 export interface UserType extends Document {
   readonly _id: string;
   name: string;
@@ -12,9 +14,8 @@ export interface UserType extends Document {
   // this is virtual attribute
   age: number;
 }
-// Product model type
 export interface ProductType extends Document {
-  readonly id: number;
+  readonly id?: number;
   name: string;
   photo: string;
   price: number;
@@ -26,7 +27,7 @@ export type OrderedItemsType = {
   photo: string;
   quantity: number;
   price: number;
-  productId: number;
+  productId: string;
 };
 export type ShippingInfoType = {
   state: string;
@@ -34,7 +35,7 @@ export type ShippingInfoType = {
   pinCode: number;
   country: string;
 };
-export interface OrderType  {
+export interface OrderType extends Document  {
   shippingInfo:ShippingInfoType;
   status?: "pending payment" | "processing" | "shipped" | "delivered";
   orderedBy: string;
