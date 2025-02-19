@@ -4,8 +4,9 @@
   "main": "index.js",
   "type": "module",
   "scripts": {
-    "start": "node dist/app.js",
     "build": "tsc",
+    "vercel-build":"npm run build",
+    "start": "node dist/app.js",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/app.js\""
   },
   "author": "Nitesh Giri",
