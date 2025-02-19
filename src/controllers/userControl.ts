@@ -7,15 +7,18 @@ import { invalidateCache } from "../utils/invalidateCache.js";
 
 export const signUp = TryCatch(
   async (req: Request<{}, {}, NewUserRequestBody>, res: Response, next: NextFunction): Promise<void> => {
-    const {name,DOB,email,gender,photo,role} = req.body;
 
-    const user = await User.findOne({email:email});
-    if (user) {
-      return next(new ErrorHandler("User already exists", 400));
-    }
-    if(!name || !DOB || !email || !gender || !photo || !role) return next(new Error("Incomplete Data"))
-    await User.create(req.body);
-       
+  const {name,email,gender,DOB,role} = req.body;
+
+   await User.create({
+    name,
+    email,
+    gender,
+    DOB,
+    role, 
+    photo:req.file?.path
+   });
+
     invalidateCache({admin:true})
     res.status(201).json({
       success: true,

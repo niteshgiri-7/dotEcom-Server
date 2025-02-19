@@ -13,6 +13,7 @@ const userSchema = new mongoose.Schema<UserType>(
       type: String,
       required: [true, "Enter email"],
       validate: validator.default.isEmail,
+      unique: true,
     },
     photo: {
       type: String,

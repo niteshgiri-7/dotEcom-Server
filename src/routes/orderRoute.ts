@@ -13,7 +13,7 @@ import { isAdmin } from "../middlewares/auth.js";
  orderRoute.get("/admin/all-orders",getAllOrders);//TODO: use req.user object to identify the user
 
 //to change the status of the order , route=>process/1234?orderId=
- orderRoute.patch("/update-status/:userId",isAdmin,processOrder);//TODO: use req.user object to identify the user
+ orderRoute.patch("/update-status/:userId",processOrder);//TODO: use req.user object to identify the user
 
  //route=> /delete/1234?orderId=
  orderRoute.delete("/delete/:userId?",cancelOrder);//TODO: use req.user object to identify the user

@@ -1,9 +1,10 @@
 import express from "express"
 import { getAllCustomers, signUp } from "../controllers/userControl.js";
+import { singleUpload } from "../middlewares/multer.js";
 
  const userRouter = express.Router();
 
-userRouter.post("/signUp",signUp);
+userRouter.post("/signUp",singleUpload,signUp);
 
 userRouter.get("/get-all",getAllCustomers);
 

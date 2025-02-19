@@ -1,6 +1,6 @@
 import { Request, NextFunction, Response } from "express";
 import ErrorHandler from "../utils/utility-class.js";
-import mongoose from "mongoose";
+import mongoose, { MongooseError } from "mongoose";
 
 const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next: NextFunction): void => {
     error.message ||= "Something went wrong";
@@ -16,12 +16,16 @@ const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next:
         error.statusCode = 400;
     }
 
-
+    if(error.name==="MongoServerError"){
+     error.message="Email Already Exists!"
+    } 
+ 
+  
     res.status(error.statusCode).json({
         success: false,
         message: error.message,
     });
-
+    console.log("error code",error)
     console.error("Error Name:", error.name);
     console.error("Error Message:", error.message);
     console.error("Error Stack Trace:\n", error.stack);
