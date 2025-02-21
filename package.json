@@ -10,7 +10,7 @@
     "ts.check": "tsc --project tsconfig.json",
     "add-build": "git add dist",
     "dev": "concurrently \"tsc -w\" \"nodemon dist/app.js\"",
-    "precommit": "npm run lint && npm run ts.check && npm run build && npm run add-build",
+    "pre-commit": "npm run lint && npm run ts.check && npm run build && npm run add-build",
     "prepare": "husky"
   },
   "author": "Nitesh Giri",
@@ -44,10 +44,5 @@
     "rimraf": "^6.0.1",
     "typescript": "^5.7.2",
     "typescript-eslint": "^8.24.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "npm run precommit"
-    }
   }
 }
