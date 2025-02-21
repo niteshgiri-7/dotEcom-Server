@@ -9,7 +9,7 @@ import {
   getProductCategories,
   getLatestProducts,
 } from "../controllers/productControl.js";
-import { isAdmin } from "../middlewares/auth.js";
+// import { isAdmin } from "../middlewares/auth.js";
 import { singleUpload } from "../middlewares/multer.js";
 
 const productRoute = express.Router(); //product's route is -> /api/v1/products/...

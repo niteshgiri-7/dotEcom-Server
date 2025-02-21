@@ -15,12 +15,15 @@ export const updateStock = async (
       );
       console.log(product)
       if (!product) throw new Error("product not found");
-      operation === "decrease"
-        ? (product.stock -= Number(order.quantity))
-        : (product.stock += Number(order.quantity));
+      
+      if(operation==="decrease")
+        product.stock-=Number(order.quantity);
+      else
+        product.stock+=Number(order.quantity);
+
       await product.save();
-      return true;
     }
+    return true;
   } catch (error) {
     console.log(error)
     return false;

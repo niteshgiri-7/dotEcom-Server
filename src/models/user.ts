@@ -1,4 +1,4 @@
-import mongoose, { Document, mongo } from "mongoose";
+import mongoose from "mongoose";
 import validator from "validator";
 import { UserType } from "../types/modelType.js";
 

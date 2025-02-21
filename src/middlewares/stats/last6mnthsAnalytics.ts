@@ -1,13 +1,15 @@
 import moment from "moment";
 import { TryCatch } from "../../utils/tryCatch.js";
 import { Request } from "express";
+import { RequestWithStats } from "../../types/requestType.js";
 
 // to calculate the stats of last months each
 // no. of orders created at each months
 // total revenue generated at each months
 export const getLastSixMnthsStats = TryCatch(
   async (req: Request, res, next) => {
-    const { lastSixMnthsOrders } = req;
+    const typedReq = req as RequestWithStats;
+    const { lastSixMnthsOrders } = typedReq;
     const noOfMonths: number = Number(process.env.NO_OF_MONTHS);
 
     const ordersCreated: number[] = new Array(noOfMonths).fill(0);
@@ -26,7 +28,7 @@ export const getLastSixMnthsStats = TryCatch(
       revenueGenerated,
     };
 
-    req.stats.lastSixMnthsStats = lastSixMnthsStats;
+    typedReq.stats.lastSixMnthsStats = lastSixMnthsStats;
     next();
   }
 );

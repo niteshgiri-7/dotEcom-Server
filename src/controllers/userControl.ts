@@ -6,7 +6,7 @@ import { NewUserRequestBody } from "../types/requestType.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 
 export const signUp = TryCatch(
-  async (req: Request<{}, {}, NewUserRequestBody>, res: Response, next: NextFunction): Promise<void> => {
+  async (req: Request<object, object, NewUserRequestBody>, res: Response): Promise<void> => {
 
   const {name,email,gender,DOB,role} = req.body;
 

@@ -1,12 +1,13 @@
+import { Request } from "express";
 import { myCache } from "../app.js";
 import { Order } from "../models/order.js";
-import { Product } from "../models/product.js";
 import { User } from "../models/user.js";
-import { StatsType } from "../types/requestType.js";
+import { RequestWithStats, StatsType } from "../types/requestType.js";
 import { TryCatch } from "../utils/tryCatch.js";
 
-export const getDashboardStats = TryCatch(async (req, res, next) => {
-  const stats: StatsType = req.stats;
+export const getDashboardStats = TryCatch(async (req:Request, res, next) => {
+  const typedReq = req as RequestWithStats;
+  const stats: StatsType = typedReq.stats;
   if (!stats) return next(new Error());
   myCache.set("admin-stats", JSON.stringify(stats));
   res.status(200).json({
@@ -15,7 +16,7 @@ export const getDashboardStats = TryCatch(async (req, res, next) => {
   });
 });
 
-export const getPieChartStats = TryCatch(async (req, res, next) => {
+export const getPieChartStats = TryCatch(async (req, res) => {
   let chart;
   const key = "chart-stats";
   if (myCache.has(key)) {

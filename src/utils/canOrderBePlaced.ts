@@ -1,6 +1,4 @@
-import { isValidObjectId } from "mongoose";
 import { Product } from "../models/product.js";
-import ErrorHandler from "./utility-class.js";
 import { OrderItemsType } from "../types/orderTypes.js";
 
 export const CanOrderBePlaced = async (orderedItems: OrderItemsType[]) => {

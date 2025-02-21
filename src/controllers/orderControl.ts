@@ -11,11 +11,11 @@ import ErrorHandler from "../utils/utility-class.js";
 
 export const createNewOrder = TryCatch(
   async (
-    req: Request<{}, {}, NewOrderRequestBody>,
+    req: Request<object, object, NewOrderRequestBody>,
     res: Response,
     next: NextFunction
   ) => {
-    const { orderedBy:userId} = req.body;
+    const { orderedBy: userId } = req.body;
     const user = await User.findById(userId);
     if (!user)
       return next(
@@ -39,23 +39,23 @@ export const createNewOrder = TryCatch(
       !status
     )
       return next(new ErrorHandler("Incomplete data", 400));
-    
+
     //validating if the orderedItems array has valid Product id and if order could be placed,canOrderBePlaced returns array of product after resolving the promise
     const productsArray = await CanOrderBePlaced(orderedItems);
-    if(productsArray.includes(null)) return next(new ErrorHandler("Orders can't be placed!Product not available",400));
-    
-    await updateStock(orderedItems,"decrease");
+    if (productsArray.includes(null))
+      return next(
+        new ErrorHandler("Orders can't be placed!Product not available", 400)
+      );
 
-    const createdOrder =await  Order.create(req.body);
+    await updateStock(orderedItems, "decrease");
+
+    const createdOrder = await Order.create(req.body);
 
     return res.status(200).json({
-      success:true,
-      message:"Order Created successfully!",
-      createdOrder
-    })
-
-
-      
+      success: true,
+      message: "Order Created successfully!",
+      createdOrder,
+    });
   }
 );
 

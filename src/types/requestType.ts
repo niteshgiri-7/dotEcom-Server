@@ -1,4 +1,5 @@
-import { OrderType, ProductType} from "./modelType.js";
+import { Request } from "express";
+import { OrderType, ProductType } from "./modelType.js";
 
 export type NewUserRequestBody = {
   readonly _id?: string;
@@ -19,47 +20,43 @@ export type NewPoductRequestBody = {
   category: string;
 };
 
-
 export type inventStatType = {
-  name:string;
-  count:number;
-  percentage?:number;
+  name: string;
+  count: number;
+  percentage?: number;
 };
 
-export type OverViewCountType ={
-  name:string;
-  count:number;
-  rate:number;
+export type OverViewCountType = {
+  name: string;
+  count: number;
+  rate: number;
+};
+
+export interface ILatestTransactions {
+  _id: string;
+  status: "pending payment" | "delivered" | "shipped" | "processing";
+  discount?: number | null | undefined;
+  total: number;
+  quantity: number;
 }
 
-export interface ILatestTransactions{
-  _id:string;
-  status:"pending payment"|"delivered"|"shipped"|"processing";
-  discount?:number|null|undefined;
-  total:number;
-  quantity:number;
-}
-
-export type StatsType={
-   overviewCount:OverViewCountType[]
-  lastSixMnthsStats?:{
-    ordersCreated:number[],
-    revenueGenerated:number[]
+export type StatsType = {
+  overviewCount: OverViewCountType[];
+  lastSixMnthsStats?: {
+    ordersCreated: number[];
+    revenueGenerated: number[];
   };
-  inventoryStats?:inventStatType[],
-  genderRatio:{
-    male:number;
-    female:number;
+  inventoryStats?: inventStatType[];
+  genderRatio: {
+    male: number;
+    female: number;
   };
-  latestTransactions:ILatestTransactions[]
-}
+  latestTransactions: ILatestTransactions[];
+};
 
-declare global {
-  namespace Express{
-    interface Request{
-      stats:StatsType;
-      lastSixMnthsOrders:OrderType[];
-      allProducts :ProductType[];
-    }
-  }
+export interface RequestWithStats extends Request{
+  stats:StatsType;
+  lastSixMnthsOrders:OrderType[];
+  allProducts:ProductType[];
+
 }

@@ -1,6 +1,6 @@
-import { Request, NextFunction, Response } from "express";
+import { NextFunction, Request, Response } from "express";
+import mongoose from "mongoose";
 import ErrorHandler from "../utils/utility-class.js";
-import mongoose, { MongooseError } from "mongoose";
 
 const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next: NextFunction): void => {
     error.message ||= "Something went wrong";
@@ -25,10 +25,11 @@ const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next:
         success: false,
         message: error.message,
     });
+    console.log("error while hiting route",req.originalUrl)
     console.log("error code",error)
     console.error("Error Name:", error.name);
     console.error("Error Message:", error.message);
-    console.error("Error Stack Trace:\n", error.stack);
+    next(error)
 };
 
 export default errorMiddleWare;

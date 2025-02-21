@@ -1,18 +1,18 @@
-import { NextFunction, query, Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import { TryCatch } from "../utils/tryCatch.js";
 
-import { Product } from "../models/product.js";
-import ErrorHandler from "../utils/utility-class.js";
 import { rm } from "fs";
 import { myCache } from "../app.js";
-import { invalidateCache } from "../utils/invalidateCache.js";
-import { NewPoductRequestBody } from "../types/requestType.js";
+import { Product } from "../models/product.js";
 import { BaseQueryType, SearchRequestQuery } from "../types/filterQueryType.js";
 import { CombinedCachedDataType, ProductType } from "../types/modelType.js";
+import { NewPoductRequestBody } from "../types/requestType.js";
+import { invalidateCache } from "../utils/invalidateCache.js";
+import ErrorHandler from "../utils/utility-class.js";
 
 export const addNewProduct = TryCatch(
   async (
-    req: Request<{}, {}, NewPoductRequestBody>,
+    req: Request<object, object, NewPoductRequestBody>,
     res: Response,
     next: NextFunction
   ) => {
@@ -157,6 +157,7 @@ export const getProductCategories = TryCatch(
       categories = JSON.parse(myCache.get("categories") as string);
     } else {
       categories = await Product.distinct("category");
+      if(!categories) return next(new ErrorHandler("No categories found",400));
       myCache.set("categories", JSON.stringify(categories));
     }
     return res.status(200).json({
@@ -183,7 +184,7 @@ export const getLatestProducts = TryCatch(
 
 export const getProductsByFilter = TryCatch(
   async (
-    req: Request<{}, {}, {}, SearchRequestQuery>,
+    req: Request<object, object, object, SearchRequestQuery>,
     res: Response,
     next: NextFunction
   ) => {

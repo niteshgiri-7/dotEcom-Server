@@ -1,6 +1,6 @@
 import express from "express";
 import { cancelOrder, createNewOrder, getAllOrders, getMyOrders, processOrder } from "../controllers/orderControl.js";
-import { isAdmin } from "../middlewares/auth.js";
+// import { isAdmin } from "../middlewares/auth.js";
 
  const orderRoute = express.Router();
 //root route is ==>> /api/v1/order

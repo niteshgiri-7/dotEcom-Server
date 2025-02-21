@@ -19,9 +19,9 @@ export interface OrderItemsType {
  export interface NewOrderRequestBody  {
     shippingInfo:ShippingInfoType;
     status:"processing"| "pending payment"| "delivered";
-    deliveryCharge:Number;
-    discount:Number;
-    total:Number;
+    deliveryCharge:number;
+    discount:number;
+    total:number;
     orderedBy:string;
     orderedItems:OrderItemsType[];
  }

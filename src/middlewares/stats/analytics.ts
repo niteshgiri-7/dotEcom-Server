@@ -2,12 +2,12 @@ import moment from "moment";
 import { Order } from "../../models/order.js";
 import { Product } from "../../models/product.js";
 import { User } from "../../models/user.js";
-import { ILatestTransactions, StatsType } from "../../types/requestType.js";
+import { RequestWithStats, StatsType } from "../../types/requestType.js";
 import { calculatePercentage } from "../../utils/calculatePercentage.js";
 import { TryCatch } from "../../utils/tryCatch.js";
-import { OrderType } from "../../types/modelType.js";
 
 export const findGrowthRate = TryCatch(async (req, res, next) => {
+  const typedReq = req as RequestWithStats;
   const today = new Date();
 
   const thisMonth = {
@@ -137,7 +137,8 @@ export const findGrowthRate = TryCatch(async (req, res, next) => {
     return {
       ...rest,
       _id:_id.toString(),
-      quantity:transaction.orderedItems.length
+      quantity:transaction.orderedItems.length,
+      orderedItems:orderedItems
     }
   })
 
@@ -178,8 +179,8 @@ export const findGrowthRate = TryCatch(async (req, res, next) => {
     genderRatio: genderRatio,
     latestTransactions:modifiedTransaction,
   };
-  req.stats = stats;
-  req.lastSixMnthsOrders = lastSixMnthsOrders; //to calcuate last 6 mnths stats in next middleware
-  req.allProducts = allProducts; //used in getInventory to find percentage occupied by each categories products
+  typedReq.stats = stats;
+  typedReq.lastSixMnthsOrders = lastSixMnthsOrders; //to calcuate last 6 mnths stats in next middleware
+  typedReq.allProducts = allProducts; //used in getInventory to find percentage occupied by each categories products
   next();
 });
