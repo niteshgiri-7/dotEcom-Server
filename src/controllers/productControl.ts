@@ -77,7 +77,7 @@ export const getAllProducts = TryCatch(
 
 export const getProductDetails = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = req.query;
+    const { productId:id } = req.params;
     let productDetails;
 
     if (myCache.has(`product-${id}`)) {
@@ -97,8 +97,9 @@ export const getProductDetails = TryCatch(
 
 export const deleteProduct = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { productId } = req.query;
-    const product = await Product.findByIdAndDelete(productId);
+
+    const { productId:id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
 
     if (!product) return next(new ErrorHandler("Product not found", 404));
 
@@ -116,7 +117,7 @@ export const deleteProduct = TryCatch(
 
 export const updateProduct = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
-    const { productId } = req.query;
+    const { productId:id } = req.params;
     const updates = req.body;
     const photoPath = req.file?.path;
     let updatedFields;
@@ -124,7 +125,7 @@ export const updateProduct = TryCatch(
     if (Object.keys(updates).length === 0)
       return next(new ErrorHandler("Nothing to update", 400));
 
-    const product = await Product.findById(productId);
+    const product = await Product.findById(id);
     if (!product) return next(new ErrorHandler("Product not found", 404));
 
     if (photoPath) {
@@ -135,7 +136,7 @@ export const updateProduct = TryCatch(
     }
     console.log("wait");
     const updatedProduct = await Product.findByIdAndUpdate(
-      productId,
+      id,
       { $set: updatedFields },
       {new:true, runValidators: true }
     );

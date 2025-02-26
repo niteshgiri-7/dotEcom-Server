@@ -2,11 +2,12 @@ import { myCache } from "../app.js";
 import { Order } from "../models/order.js";
 import { User } from "../models/user.js";
 import { TryCatch } from "../utils/tryCatch.js";
+import ErrorHandler from "../utils/utility-class.js";
 export const getDashboardStats = TryCatch(async (req, res, next) => {
     const typedReq = req;
     const stats = typedReq.stats;
     if (!stats)
-        return next(new Error());
+        return next(new ErrorHandler("No Stats Found", 404));
     myCache.set("admin-stats", JSON.stringify(stats));
     res.status(200).json({
         success: true,

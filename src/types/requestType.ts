@@ -1,8 +1,9 @@
 import { Request } from "express";
 import { OrderType, ProductType } from "./modelType.js";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 export type NewUserRequestBody = {
-  readonly _id?: string;
+  readonly id:string;
   name: string;
   email: string;
   photo: string;
@@ -59,4 +60,11 @@ export interface RequestWithStats extends Request{
   lastSixMnthsOrders:OrderType[];
   allProducts:ProductType[];
 
+}
+
+export interface ICustomDecodedIdToken extends DecodedIdToken{
+  role:string;
+}
+export interface IAuthRequest extends Request{
+  user?:ICustomDecodedIdToken;
 }

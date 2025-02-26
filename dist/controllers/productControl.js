@@ -52,7 +52,7 @@ export const getAllProducts = TryCatch(async (req, res, next) => {
     return res.status(200).json({ success: true, Products });
 });
 export const getProductDetails = TryCatch(async (req, res, next) => {
-    const { id } = req.query;
+    const { productId: id } = req.params;
     let productDetails;
     if (myCache.has(`product-${id}`)) {
         productDetails = JSON.parse(myCache.get(`product-${id}`));
@@ -66,8 +66,8 @@ export const getProductDetails = TryCatch(async (req, res, next) => {
     return res.status(200).json({ success: true, productDetails });
 });
 export const deleteProduct = TryCatch(async (req, res, next) => {
-    const { productId } = req.query;
-    const product = await Product.findByIdAndDelete(productId);
+    const { productId: id } = req.params;
+    const product = await Product.findByIdAndDelete(id);
     if (!product)
         return next(new ErrorHandler("Product not found", 404));
     rm(product.photo, () => {
@@ -80,13 +80,13 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
     });
 });
 export const updateProduct = TryCatch(async (req, res, next) => {
-    const { productId } = req.query;
+    const { productId: id } = req.params;
     const updates = req.body;
     const photoPath = req.file?.path;
     let updatedFields;
     if (Object.keys(updates).length === 0)
         return next(new ErrorHandler("Nothing to update", 400));
-    const product = await Product.findById(productId);
+    const product = await Product.findById(id);
     if (!product)
         return next(new ErrorHandler("Product not found", 404));
     if (photoPath) {
@@ -96,7 +96,7 @@ export const updateProduct = TryCatch(async (req, res, next) => {
         });
     }
     console.log("wait");
-    const updatedProduct = await Product.findByIdAndUpdate(productId, { $set: updatedFields }, { new: true, runValidators: true });
+    const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, runValidators: true });
     invalidateCache({ product: true, admin: true });
     console.log("sending response");
     return res.status(200).json({

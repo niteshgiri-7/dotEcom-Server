@@ -28,27 +28,34 @@ export const CreateNewCoupon = TryCatch(
 );
 
 export const checkCouponValidity = TryCatch(async (req, res, next) => {
-  const { coupon } = req.query;
-  const key = `coupon-${coupon}`;
-  let discount;
 
-  if (!coupon) return next(new ErrorHandler("Coupon required", 404));
+  const { couponId: id } = req.params;
+
+  const key = `coupon-${id}`;
+
+  let coupon;
 
   if (myCache.has(key)) {
-    discount = JSON.parse(myCache.get(key) as string);
+    coupon = JSON.parse(myCache.get(key) as string);
   } else {
-    discount = await Coupon.findOne({ code: coupon }).select(
-      "discountedAmount"
-    );
+    coupon = await Coupon.findById(id);
 
-    if (!discount) return next(new ErrorHandler("Invalid Coupon Code", 400));
+    if (!coupon) return next(new ErrorHandler("Coupon not found", 404));
 
-    myCache.set(key, JSON.stringify(discount));
+    const isReedemAvailable: boolean =
+      (coupon?.availableRedemptionCount as number) > 0;
+    const isExipred: boolean = coupon.expiresAt.getTime() < Date.now();
+
+    if (!isReedemAvailable || isExipred)
+      return next(new ErrorHandler("Coupon validation failed", 400));
+
+    myCache.set(key, JSON.stringify(coupon));
   }
 
   return res.status(200).json({
     success: true,
-    discount,
+    message: "Coupon is valid and can be used",
+    discountAmount: coupon.discountedAmount,
   });
 });
 

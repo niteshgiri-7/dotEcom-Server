@@ -1,21 +1,25 @@
 import express from "express";
 import { cancelOrder, createNewOrder, getAllOrders, getMyOrders, processOrder } from "../controllers/orderControl.js";
+import { authenticateUser } from "../middlewares/auth.js";
 // import { isAdmin } from "../middlewares/auth.js";
 
  const orderRoute = express.Router();
 //root route is ==>> /api/v1/order
  //FIXME: tala userId jotma as params gai racha,jwt halera user lai req.user bata ani orders lai orderId req.params bata liney
+
+//  .../api/v1/order is the base url
+
+ orderRoute.use(authenticateUser);
+
  orderRoute.post("/create-new",createNewOrder);
+ 
+ orderRoute.get("/my-orders",getMyOrders);
 
-// req query is ?userId=
- orderRoute.get("/my-orders",getMyOrders);//TODO: use req.user object to identify the user
+ orderRoute.get("/admin/all-orders",getAllOrders);
 
- orderRoute.get("/admin/all-orders",getAllOrders);//TODO: use req.user object to identify the user
-
-//to change the status of the order , route=>process/1234?orderId=
- orderRoute.patch("/update-status/:userId",processOrder);//TODO: use req.user object to identify the user
+ orderRoute.patch("/update-status/:orderId",processOrder);
 
  //route=> /delete/1234?orderId=
- orderRoute.delete("/delete/:userId?",cancelOrder);//TODO: use req.user object to identify the user
+ orderRoute.delete("/cancel/:orderId",cancelOrder);//TODO: use req.user object to identify the user
 
  export default orderRoute;

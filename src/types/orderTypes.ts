@@ -22,6 +22,5 @@ export interface OrderItemsType {
     deliveryCharge:number;
     discount:number;
     total:number;
-    orderedBy:string;
     orderedItems:OrderItemsType[];
  }

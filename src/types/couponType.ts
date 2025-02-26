@@ -5,6 +5,6 @@ export interface ICoupon extends Document{
     code:string;
     discountedAmount:number|string;
     maxRedemptionCount:number|string;
-    expiresAt:Date|string;
+    expiresAt:Date;
     availableRedemptionCount?:number;
 }

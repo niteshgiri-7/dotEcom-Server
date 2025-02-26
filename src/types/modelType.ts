@@ -1,7 +1,7 @@
 import { Document } from "mongoose";
 
 export interface UserType extends Document {
-  readonly _id: string;
+  readonly id: string;
   name: string;
   email: string;
   photo: string;
@@ -35,15 +35,15 @@ export type ShippingInfoType = {
   pinCode: number;
   country: string;
 };
-export interface OrderType extends Document  {
-  shippingInfo:ShippingInfoType;
+export interface OrderType extends Document {
+  shippingInfo: ShippingInfoType;
   status?: "pending payment" | "processing" | "shipped" | "delivered";
   orderedBy: string;
   deliveryCharge: number;
-  discount?: number|null;
+  discount?: number | null;
   total: number;
   orderedItems: OrderedItemsType[];
-  createdAt:Date;
+  createdAt: Date;
 }
 
 export type CombinedCachedDataType = {

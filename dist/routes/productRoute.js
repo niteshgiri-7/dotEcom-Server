@@ -1,18 +1,19 @@
 import express from "express";
 import { addNewProduct, deleteProduct, getAllProducts, getProductDetails, updateProduct, getProductsByFilter, getProductCategories, getLatestProducts, } from "../controllers/productControl.js";
-// import { isAdmin } from "../middlewares/auth.js";
 import { singleUpload } from "../middlewares/multer.js";
+import { authenticateUser, ensureAdminOnlyAccess } from "../middlewares/auth.js";
 const productRoute = express.Router(); //product's route is -> /api/v1/products/...
-productRoute.post("/add/:userId", singleUpload, addNewProduct);
+// .../api/v1/products is the base url
 productRoute.get("/all", getAllProducts);
-productRoute.get("/categories", getProductCategories);
 productRoute.get("/latest", getLatestProducts);
+productRoute.get("/categories", getProductCategories);
 // .../api/v1/products/filter/?search=...&price=...&category=...&sort=...&page=...
 productRoute.get("/filter", getProductsByFilter);
-// .../api/v1/products/:userId/productId?=
+productRoute.use(authenticateUser);
+productRoute.post("/add-new", ensureAdminOnlyAccess, singleUpload, addNewProduct);
 productRoute
-    .route("/:userId")
+    .route("/:productId")
     .get(getProductDetails)
-    .delete(deleteProduct)
-    .put(singleUpload, updateProduct);
+    .delete(ensureAdminOnlyAccess, deleteProduct)
+    .put(ensureAdminOnlyAccess, singleUpload, updateProduct);
 export default productRoute;

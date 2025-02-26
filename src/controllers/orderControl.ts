@@ -3,6 +3,7 @@ import { myCache } from "../app.js";
 import { Order } from "../models/order.js";
 import { User } from "../models/user.js";
 import { NewOrderRequestBody } from "../types/orderTypes.js";
+import { IAuthRequest } from "../types/requestType.js";
 import { CanOrderBePlaced } from "../utils/canOrderBePlaced.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import { TryCatch } from "../utils/tryCatch.js";
@@ -15,8 +16,11 @@ export const createNewOrder = TryCatch(
     res: Response,
     next: NextFunction
   ) => {
-    const { orderedBy: userId } = req.body;
-    const user = await User.findById(userId);
+
+    const authReq = req as IAuthRequest;
+     const {uid:id} = authReq.user!;
+
+    const user = await User.findById(id);
     if (!user)
       return next(
         new ErrorHandler("Invalid request,user not found in our system", 400)
@@ -29,18 +33,18 @@ export const createNewOrder = TryCatch(
       status,
       total,
     } = req.body;
+
     if (
       !deliveryCharge ||
       !discount ||
       !orderedItems ||
       !shippingInfo ||
       !total ||
-      !userId ||
       !status
     )
       return next(new ErrorHandler("Incomplete data", 400));
 
-    //validating if the orderedItems array has valid Product id and if order could be placed,canOrderBePlaced returns array of product after resolving the promise
+    //validating if the orderedItems array has valid Product id and if order could be placed,canOrderBePlaced returns array of product|null after resolving the promise
     const productsArray = await CanOrderBePlaced(orderedItems);
     if (productsArray.includes(null))
       return next(
@@ -49,7 +53,7 @@ export const createNewOrder = TryCatch(
 
     await updateStock(orderedItems, "decrease");
 
-    const createdOrder = await Order.create(req.body);
+    const createdOrder = await Order.create({...req.body,orderedBy:id});
 
     return res.status(200).json({
       success: true,
@@ -59,18 +63,19 @@ export const createNewOrder = TryCatch(
   }
 );
 
-export const getMyOrders = TryCatch(async (req, res, next) => {
-  const { userId: user } = req.query;
-  const ordersKey = `order-${user}`;
+export const getMyOrders = TryCatch(async (req:IAuthRequest, res, next) => {
+
+   const {uid:userId} = req.user!;
+
+  const ordersKey = `order-${userId}`;
 
   let orders = [];
 
   if (myCache.has(ordersKey)) {
     orders = JSON.parse(myCache.get(ordersKey) as string);
   }
-  //FIXME: check if user exist or not
   else {
-    orders = await Order.find({ orderedBy: user });
+    orders = await Order.find({ orderedBy: userId });
     if (orders.length === 0)
       return next(new ErrorHandler("You have not placed any orders yet", 404));
     myCache.set(ordersKey, JSON.stringify(orders));
@@ -81,9 +86,8 @@ export const getMyOrders = TryCatch(async (req, res, next) => {
   });
 });
 
-//for admin to get all the placed orders
 export const getAllOrders = TryCatch(async (req, res, next) => {
-  //FIXME: check if user exist or not
+  
   let allOrders = [];
   const key = "all-orders";
   if (myCache.has(key)) {
@@ -99,11 +103,15 @@ export const getAllOrders = TryCatch(async (req, res, next) => {
     allOrders,
   });
 });
-//FIXME: only admin can process the order status
-export const processOrder = TryCatch(async (req, res, next) => {
-  const { userId } = req.params;
-  const { orderId } = req.query;
+
+
+export const processOrder = TryCatch(async (req:IAuthRequest, res, next) => {
+ 
+  const {orderId} = req.params;
+  const {uid:id} = req.user!;
+
   const order = await Order.findById(orderId);
+  
   if (!order) return next(new ErrorHandler("order not found", 404));
 
   switch (order.status) {
@@ -123,7 +131,7 @@ export const processOrder = TryCatch(async (req, res, next) => {
 
   await order.save();
 
-  invalidateCache({ admin: true, order: true, userId: userId });
+  invalidateCache({ admin: true, order: true, userId: id });
 
   return res.status(200).json({
     success: true,
@@ -131,9 +139,10 @@ export const processOrder = TryCatch(async (req, res, next) => {
   });
 });
 
-export const cancelOrder = TryCatch(async (req, res, next) => {
-  const { userId } = req.params;
-  const { orderId } = req.query;
+export const cancelOrder = TryCatch(async (req:IAuthRequest, res, next) => {
+ 
+  const {uid:userId} = req.user!;
+  const {orderId}= req.params;
 
   const order = await Order.findById(orderId);
   if (!order) return next(new ErrorHandler("Order not found", 404));

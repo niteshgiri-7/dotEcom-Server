@@ -2,9 +2,13 @@ import mongoose from "mongoose";
 import validator from "validator";
 import { UserType } from "../types/modelType.js";
 
-
 const userSchema = new mongoose.Schema<UserType>(
   {
+    id: {
+      type: String,
+      required: [true, "Please provide uid of the user"],
+      unique: true,
+    },
     name: {
       type: String,
       required: [true, "Enter name"],
@@ -36,6 +40,7 @@ const userSchema = new mongoose.Schema<UserType>(
   },
   {
     timestamps: true,
+    _id:false,
   }
 );
 

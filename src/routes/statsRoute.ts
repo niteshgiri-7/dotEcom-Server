@@ -4,11 +4,13 @@ import { findGrowthRate } from "../middlewares/stats/analytics.js";
 import { getLastSixMnthsStats } from "../middlewares/stats/last6mnthsAnalytics.js";
 import { getInventoryStats } from "../middlewares/stats/getInventory.js";
 import { cachedStats } from "../middlewares/stats/cachedStats.js";
+import { authenticateUser, ensureAdminOnlyAccess } from "../middlewares/auth.js";
 // routes to get the statistics of the admin dashboard
 
 const statsRoute = express.Router();
 
 
+statsRoute.use(authenticateUser,ensureAdminOnlyAccess);
 
 statsRoute.get("/admin-dashboard",cachedStats,findGrowthRate,getLastSixMnthsStats,getInventoryStats,getDashboardStats);
 

@@ -47,6 +47,8 @@ app.use("/api/v1/order",orderRoute)
 app.use("/api/v1/payment",paymentRoute);
 app.use("/api/v1/stats",statsRoute);
 
+
+
 app.use("/uploads",express.static("uploads"));
 app.use(errorMiddleWare);
 

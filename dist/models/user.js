@@ -1,6 +1,11 @@
 import mongoose from "mongoose";
 import validator from "validator";
 const userSchema = new mongoose.Schema({
+    id: {
+        type: String,
+        required: [true, "Please provide uid of the user"],
+        unique: true,
+    },
     name: {
         type: String,
         required: [true, "Enter name"],
@@ -31,6 +36,7 @@ const userSchema = new mongoose.Schema({
     },
 }, {
     timestamps: true,
+    _id: false,
 });
 userSchema.virtual("age").get(function () {
     const today = new Date();

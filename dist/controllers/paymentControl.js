@@ -16,23 +16,26 @@ export const CreateNewCoupon = TryCatch(async (req, res, next) => {
     });
 });
 export const checkCouponValidity = TryCatch(async (req, res, next) => {
-    const { coupon } = req.query;
-    const key = `coupon-${coupon}`;
-    let discount;
-    if (!coupon)
-        return next(new ErrorHandler("Coupon required", 404));
+    const { couponId: id } = req.params;
+    const key = `coupon-${id}`;
+    let coupon;
     if (myCache.has(key)) {
-        discount = JSON.parse(myCache.get(key));
+        coupon = JSON.parse(myCache.get(key));
     }
     else {
-        discount = await Coupon.findOne({ code: coupon }).select("discountedAmount");
-        if (!discount)
-            return next(new ErrorHandler("Invalid Coupon Code", 400));
-        myCache.set(key, JSON.stringify(discount));
+        coupon = await Coupon.findById(id);
+        if (!coupon)
+            return next(new ErrorHandler("Coupon not found", 404));
+        const isReedemAvailable = coupon?.availableRedemptionCount > 0;
+        const isExipred = coupon.expiresAt.getTime() < Date.now();
+        if (!isReedemAvailable || isExipred)
+            return next(new ErrorHandler("Coupon validation failed", 400));
+        myCache.set(key, JSON.stringify(coupon));
     }
     return res.status(200).json({
         success: true,
-        discount,
+        message: "Coupon is valid and can be used",
+        discountAmount: coupon.discountedAmount,
     });
 });
 export const getAllCoupons = TryCatch(async (req, res, next) => {
