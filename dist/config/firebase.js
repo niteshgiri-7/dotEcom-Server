@@ -1,5 +1,5 @@
 import admin from "firebase-admin";
-import firesbaseAdminService from "../../firebaseAdminService.json" assert { type: "json" };
+import firesbaseAdminService from "../../firebaseAdminService.json" with { type: "json" };
 admin.initializeApp({
     credential: admin.credential.cert(firesbaseAdminService),
 });

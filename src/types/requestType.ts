@@ -3,7 +3,7 @@ import { OrderType, ProductType } from "./modelType.js";
 import { DecodedIdToken } from "firebase-admin/auth";
 
 export type NewUserRequestBody = {
-  readonly id:string;
+  uid:string;
   name: string;
   email: string;
   photo: string;
@@ -67,4 +67,11 @@ export interface ICustomDecodedIdToken extends DecodedIdToken{
 }
 export interface IAuthRequest extends Request{
   user?:ICustomDecodedIdToken;
+}
+
+export interface IUploadImageRequest extends Request{
+  fileUpload?:{
+    imageUrl:string;
+    publicId:string;
+  }
 }

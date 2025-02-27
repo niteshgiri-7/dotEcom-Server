@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import validator from "validator";
 const userSchema = new mongoose.Schema({
-    id: {
+    _id: {
         type: String,
         required: [true, "Please provide uid of the user"],
         unique: true,
@@ -17,8 +17,14 @@ const userSchema = new mongoose.Schema({
         unique: true,
     },
     photo: {
-        type: String,
-        required: [true, "Add Photo"],
+        secure_url: {
+            type: String,
+            required: [true, "Enter secure_url of the image"],
+        },
+        public_id: {
+            type: String,
+            required: [true, "Enter public_id of the image"],
+        },
     },
     gender: {
         type: String,

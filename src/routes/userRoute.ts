@@ -1,6 +1,6 @@
 import express from "express"
 import { getAllCustomers, signUp } from "../controllers/userControl.js";
-import { singleUpload } from "../middlewares/multer.js";
+import { singleUpload } from "../middlewares/multerUploadMiddleware.js";
 import { authenticateUser, ensureAdminOnlyAccess } from "../middlewares/auth.js";
 
  const userRouter = express.Router();

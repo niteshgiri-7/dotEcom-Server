@@ -1,10 +1,13 @@
 import { Document } from "mongoose";
 
 export interface UserType extends Document {
-  readonly id: string;
+  _id: string;
   name: string;
   email: string;
-  photo: string;
+  photo: {
+    secure_url:string;
+    public_id:string;
+  }
   gender: "male" | "female";
   role: "user" | "admin";
   DOB: Date;
@@ -15,9 +18,12 @@ export interface UserType extends Document {
   age: number;
 }
 export interface ProductType extends Document {
-  readonly id?: number;
+  readonly _id: number;
   name: string;
-  photo: string;
+  photo: {
+    secure_url:string;
+    public_id:string
+  };
   price: number;
   stock: number;
   category: string;

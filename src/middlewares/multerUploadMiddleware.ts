@@ -1,10 +1,53 @@
+import { Request } from "express";
+import multer from "multer";
+import ErrorHandler from "../utils/utility-class.js";
+import { fileTypeFromBuffer, FileTypeResult } from "file-type";
+
+const storage = multer.memoryStorage();
+
+const fileFilter = async(_req:Request,file:Express.Multer.File,callBack:multer.FileFilterCallback) =>{
+
+  const allowedMimeTypes = ["jpeg","jpg","png"];
+
+  const fileType:FileTypeResult|undefined = await fileTypeFromBuffer(file.buffer);
+
+  if(!fileType) return callBack(new ErrorHandler("Invalid file type,couldn't read the file type",400));
+
+  const {mime} = fileType;
+ 
+  const isMimeTypeValid = allowedMimeTypes.includes(mime);
+
+
+
+
+  if( isMimeTypeValid)
+   return callBack(null,true);//null means error->null and true means acceptFile=>true,
+  
+  callBack(new ErrorHandler("Invalid image type!,Only JPEG,JPG and PNG are allowed",400));
+}
+
+export const uploadImageViaMulter = multer({storage,
+  limits:{
+    fileSize:8*1024*1024
+  },
+  fileFilter:fileFilter
+}).single("photo");
+
+
+
+
+
+
+
+
+
+/*
 import multer from "multer";
 import path from "path";
 import fs from "fs/promises";
 import { v4 as uuid } from "uuid";
 import { fileURLToPath } from "url";
 
-//TODO:use S3 bucket to store and serve the images
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
@@ -34,3 +77,4 @@ const storage = multer.diskStorage({
 });
 
 export const singleUpload = multer({ storage }).single("photo"); // can be accessed by multer.file.photo
+*/

@@ -2,15 +2,21 @@ import mongoose from "mongoose";
 import { ProductType } from "../types/modelType.js";
 
 
-const productSchema = new mongoose.Schema(
+const productSchema = new mongoose.Schema<ProductType>(
   {
     name: {
       type: String,
       required: [true, "Enter product name"],
     },
     photo: {
-      type: String,
-      required: [true, "Add Photo"],
+        secure_url:{
+          type:String,
+          required:[true,"Enter secure_url of image"]
+        },
+        public_id:{
+          type:String,
+          required:[true,"Enter public_id of image"]
+        }
     },
     price: {
       type: Number,

@@ -1,29 +1,25 @@
 import { TryCatch } from "../utils/tryCatch.js";
-import { rm } from "fs";
 import { myCache } from "../app.js";
+import cloudinary from "../config/cloudinaryConfig.js";
 import { Product } from "../models/product.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import ErrorHandler from "../utils/utility-class.js";
 export const addNewProduct = TryCatch(async (req, res, next) => {
     console.log("from controller", req.body);
+    const imageReq = req;
     const { category, name, price, stock } = req.body;
     if (!req.file)
         return next(new ErrorHandler("Please Add Photo", 400));
     const productExist = await Product.findOne({ name: name });
-    if (productExist) {
-        rm(req.file.path, () => console.log("duplicate file removed since already exists"));
-        return next(new ErrorHandler("product already Exists", 400));
-    }
-    if (!name || !category || !price || !stock) {
-        rm(req.file.path, () => {
-            console.log(req.file?.path, "deleted");
-        });
-        return next(new Error("Incomplete Data"));
-    }
+    if (productExist)
+        await cloudinary.uploader.destroy(imageReq.fileUpload?.publicId);
     const savedProduct = await Product.create({
         category: category.toLowerCase(),
         name,
-        photo: req.file.path,
+        photo: {
+            secure_url: imageReq.fileUpload?.imageUrl,
+            public_id: imageReq.fileUpload?.publicId
+        },
         price,
         stock,
     });
@@ -70,9 +66,7 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
     const product = await Product.findByIdAndDelete(id);
     if (!product)
         return next(new ErrorHandler("Product not found", 404));
-    rm(product.photo, () => {
-        console.log("photo deleted");
-    });
+    await cloudinary.uploader.destroy(product.photo.public_id);
     await invalidateCache({ product: true, admin: true });
     return res.status(200).json({
         success: true,
@@ -80,22 +74,20 @@ export const deleteProduct = TryCatch(async (req, res, next) => {
     });
 });
 export const updateProduct = TryCatch(async (req, res, next) => {
+    const updateProductImageReq = req;
+    const newPhoto = updateProductImageReq.fileUpload;
     const { productId: id } = req.params;
     const updates = req.body;
-    const photoPath = req.file?.path;
     let updatedFields;
     if (Object.keys(updates).length === 0)
         return next(new ErrorHandler("Nothing to update", 400));
     const product = await Product.findById(id);
     if (!product)
         return next(new ErrorHandler("Product not found", 404));
-    if (photoPath) {
-        updatedFields = { ...updates, photo: photoPath };
-        rm(product?.photo, () => {
-            console.log("Old photo deleted");
-        });
+    if (newPhoto) {
+        updatedFields = { ...updates, photo: { secure_url: newPhoto.imageUrl, public_id: newPhoto.publicId } };
+        await cloudinary.uploader.destroy(product.photo.public_id);
     }
-    console.log("wait");
     const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, runValidators: true });
     invalidateCache({ product: true, admin: true });
     console.log("sending response");

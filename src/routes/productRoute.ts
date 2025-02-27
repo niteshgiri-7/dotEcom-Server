@@ -11,9 +11,10 @@ import {
   getLatestProducts,
 } from "../controllers/productControl.js";
 
-import { singleUpload } from "../middlewares/multer.js";
 
 import { authenticateUser, ensureAdminOnlyAccess } from "../middlewares/auth.js";
+import uploadToCloudinary from "../middlewares/uploadToCloudinary.js";
+import { uploadImageViaMulter } from "../middlewares/multerUploadMiddleware.js";
 
 const productRoute = express.Router(); //product's route is -> /api/v1/products/...
 
@@ -33,13 +34,13 @@ productRoute.get("/filter", getProductsByFilter);
 
 productRoute.use(authenticateUser);
 
-productRoute.post("/add-new",ensureAdminOnlyAccess, singleUpload, addNewProduct);
+productRoute.post("/add-new",ensureAdminOnlyAccess, uploadImageViaMulter,uploadToCloudinary, addNewProduct);
 
 
 productRoute
   .route("/:productId")
   .get(getProductDetails)
   .delete(ensureAdminOnlyAccess, deleteProduct)
-  .put(ensureAdminOnlyAccess, singleUpload, updateProduct);
+  .put(ensureAdminOnlyAccess,uploadImageViaMulter,uploadToCloudinary, updateProduct);
 
 export default productRoute;

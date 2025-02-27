@@ -4,24 +4,29 @@ import { User } from "../models/user.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import admin from "../config/firebase.js";
 export const signUp = TryCatch(async (req, res, next) => {
-    const { id: uid, name, email, gender, DOB, role } = req.body;
+    const newUserImage = req;
+    const { uid, name, email, gender, DOB, role: roleOfNewPersonInReqBody } = req.body;
     const isAdminThereInSystem = await User.find({ role: "admin" });
-    if (isAdminThereInSystem && role === "admin")
+    if (isAdminThereInSystem && roleOfNewPersonInReqBody === "admin")
         return next(new ErrorHandler("Can't signUp,admin already exists!", 401));
-    await User.create({
+    const user = await User.create({
         _id: uid,
         name,
         email,
         gender,
         DOB,
-        role,
-        photo: req.file?.path
+        role: roleOfNewPersonInReqBody,
+        photo: {
+            secure_url: newUserImage.fileUpload?.imageUrl,
+            public_id: newUserImage.fileUpload?.publicId
+        }
     });
-    await admin.auth().setCustomUserClaims(uid, { role });
+    await admin.auth().setCustomUserClaims(uid, { role: roleOfNewPersonInReqBody });
     invalidateCache({ admin: true });
     res.status(201).json({
         success: true,
         message: `Welcome ${req.body.name}`,
+        user
     });
 });
 export const getAllCustomers = TryCatch(async (req, res, next) => {
