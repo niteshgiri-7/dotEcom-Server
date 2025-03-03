@@ -1,6 +1,7 @@
 import { Request } from "express";
-import { OrderType, ProductType } from "./modelType.js";
+import { OrderType, ProductType, ShippingInfoType } from "./modelType.js";
 import { DecodedIdToken } from "firebase-admin/auth";
+import { OrderItemsType } from "./orderTypes.js";
 
 export type NewUserRequestBody = {
   uid:string;
@@ -35,7 +36,7 @@ export type OverViewCountType = {
 
 export interface ILatestTransactions {
   _id: string;
-  status: "pending payment" | "delivered" | "shipped" | "processing";
+  status?: "pending payment" | "delivered" | "shipped" | "processing";
   discount?: number | null | undefined;
   total: number;
   quantity: number;
@@ -74,4 +75,14 @@ export interface IUploadImageRequest extends Request{
     imageUrl:string;
     publicId:string;
   }
+}
+
+
+
+export interface IinitiatePaymentRequestBody {
+  shippingInfo:ShippingInfoType;
+  orderedItems:OrderItemsType[]
+  couponCode?:string;
+  orderedBy?:string;
+  total:number;
 }

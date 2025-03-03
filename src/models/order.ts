@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
+import { OrderType } from "../types/modelType.js";
 
-const orderSchema = new mongoose.Schema(
+const orderSchema = new mongoose.Schema<OrderType>(
   {
     shippingInfo: {
       type: {
@@ -23,7 +24,6 @@ const orderSchema = new mongoose.Schema(
       },
       required: [true, "Shipping information is required"], // This makes the entire object required
     },
-    
     status: {
       type: String,
       enum: ["pending payment","processing","shipped","delivered"],
@@ -34,39 +34,40 @@ const orderSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    deliveryCharge: {
-      type: Number,
-      required: true,
-    },
-    discount: {
-      type: Number,
-    },
     total: {
       type: Number,
       required: true,
     },
     orderedItems: [
       {
+        _id: {
+          type: String,
+          ref: "Product",
+          required:true
+        },
         name: {
           type:String,
           required:true,
-        },
-
-          photo:{
-            type: String,
-            required:true,
-        },
-        quantity:{
-          type:Number,
-          required:true
         },
         price:{
           type:Number,
           required:true
         } ,
-        productId: {
-          type: String,
-          ref: "Product",
+        stock:{
+          type:Number
+        },
+          photo:{
+             secure_url:{
+              type:String,
+              required:[true,"photo secure_url needed"]
+             },
+             public_id:{
+              type:String,
+              required:[true,"public_id required"]
+             }
+        },
+        quantity:{
+          type:Number,
           required:true
         },
       }

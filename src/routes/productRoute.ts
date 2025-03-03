@@ -23,6 +23,8 @@ const productRoute = express.Router(); //product's route is -> /api/v1/products/
 
 productRoute.get("/all", getAllProducts);
 
+productRoute.use(authenticateUser);
+
 productRoute.get("/latest", getLatestProducts);
 
 productRoute.get("/categories", getProductCategories);
@@ -32,7 +34,6 @@ productRoute.get("/filter", getProductsByFilter);
 
 
 
-productRoute.use(authenticateUser);
 
 productRoute.post("/add-new",ensureAdminOnlyAccess, uploadImageViaMulter,uploadToCloudinary, addNewProduct);
 

@@ -1,23 +1,15 @@
-import express from "express";
-import {
-  checkCouponValidity,
-  CreateNewCoupon,
-  deleteCoupon,
-  getAllCoupons,
-} from "../controllers/paymentControl.js";
-import { authenticateUser, ensureAdminOnlyAccess } from "../middlewares/auth.js";
+import { Router } from "express";
+import { InitiatePayment, VerifyPayment } from "../controllers/paymentControl.js";
+import { authenticateUser } from "../middlewares/auth.js";
 
-const paymentRoute = express.Router();
+const paymentRoute = Router();
+
 
 paymentRoute.use(authenticateUser);
 
-paymentRoute.post("/coupon/create-new",ensureAdminOnlyAccess, CreateNewCoupon);
+paymentRoute.use("/initiate",InitiatePayment);
 
-//req.query=> ?coupon=
-paymentRoute.get("/coupon/validate/:couponId", checkCouponValidity);
-//TODO:admin only
-paymentRoute.get("/get-all-coupons", getAllCoupons);
-//TODO:admin only
-paymentRoute.delete("/delete/coupon/:couponId",ensureAdminOnlyAccess, deleteCoupon);
+paymentRoute.use("/verify",VerifyPayment);
+
 
 export default paymentRoute;

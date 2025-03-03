@@ -1,19 +1,12 @@
+import { ShippingInfoType } from "./modelType.js";
 
-
-export type ShippingInfoType={
-  state:string;
-  city:string;
-  country:string;
-  pinCode:number;
-}
 
 export interface OrderItemsType {
     name:string;
     photo:string;
     quantity:string|number;
     price:number;
-    productId:string|number;
-
+    _id:string|number;
 }
 
  export interface NewOrderRequestBody  {

@@ -33,7 +33,7 @@ export type OrderedItemsType = {
   photo: string;
   quantity: number;
   price: number;
-  productId: string;
+  _id: string;
 };
 export type ShippingInfoType = {
   state: string;
@@ -45,7 +45,6 @@ export interface OrderType extends Document {
   shippingInfo: ShippingInfoType;
   status?: "pending payment" | "processing" | "shipped" | "delivered";
   orderedBy: string;
-  deliveryCharge: number;
   discount?: number | null;
   total: number;
   orderedItems: OrderedItemsType[];

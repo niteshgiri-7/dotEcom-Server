@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import mongoose from "mongoose";
 import ErrorHandler from "../utils/utility-class.js";
+import { AxiosError } from "axios";
 
 const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next: NextFunction): void => {
     error.message ||= "Something went wrong";
@@ -16,6 +17,10 @@ const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next:
         error.statusCode = 400;
     }
 
+    if(error instanceof AxiosError){
+        error.message = error.response?.data
+    }
+
     if(error.name==="MongoServerError"){
      error.message="Email Already Exists!"
     } 
@@ -25,8 +30,6 @@ const errorMiddleWare = (error: ErrorHandler, req: Request, res: Response, next:
         success: false,
         message: error.message,
     });
-    console.log("error while hiting route",req.originalUrl)
-    console.log("error code",error)
     console.error("Error Name:", error.name);
     console.error("Error Message:", error.message);
     next(error)

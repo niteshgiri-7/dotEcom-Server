@@ -3,12 +3,12 @@ import ErrorHandler from "../utils/utility-class.js";
 import { User } from "../models/user.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import admin from "../config/firebase.js";
-export const signUp = TryCatch(async (req, res, next) => {
+export const signUp = TryCatch(async (req, res) => {
     const newUserImage = req;
-    const { uid, name, email, gender, DOB, role: roleOfNewPersonInReqBody } = req.body;
-    const isAdminThereInSystem = await User.find({ role: "admin" });
+    const { uid, name, email, gender, DOB, role: roleOfNewPersonInReqBody, } = req.body;
+    const isAdminThereInSystem = await User.exists({ role: "admin" });
     if (isAdminThereInSystem && roleOfNewPersonInReqBody === "admin")
-        return next(new ErrorHandler("Can't signUp,admin already exists!", 401));
+        throw new ErrorHandler("can't signup, admin already exists", 401);
     const user = await User.create({
         _id: uid,
         name,
@@ -18,15 +18,17 @@ export const signUp = TryCatch(async (req, res, next) => {
         role: roleOfNewPersonInReqBody,
         photo: {
             secure_url: newUserImage.fileUpload?.imageUrl,
-            public_id: newUserImage.fileUpload?.publicId
-        }
+            public_id: newUserImage.fileUpload?.publicId,
+        },
     });
-    await admin.auth().setCustomUserClaims(uid, { role: roleOfNewPersonInReqBody });
+    await admin
+        .auth()
+        .setCustomUserClaims(uid, { role: roleOfNewPersonInReqBody });
     invalidateCache({ admin: true });
     res.status(201).json({
         success: true,
         message: `Welcome ${req.body.name}`,
-        user
+        user,
     });
 });
 export const getAllCustomers = TryCatch(async (req, res, next) => {
@@ -35,6 +37,6 @@ export const getAllCustomers = TryCatch(async (req, res, next) => {
         return next(new ErrorHandler("No customers Found", 404));
     res.status(200).json({
         success: true,
-        allCustomers
+        allCustomers,
     });
 });

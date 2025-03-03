@@ -1,68 +1,102 @@
-import { myCache } from "../app.js";
+import axios from "axios";
+import { v4 as uuidv4 } from "uuid";
 import { Coupon } from "../models/coupon.js";
-import { invalidateCache } from "../utils/invalidateCache.js";
+import { Product } from "../models/product.js";
 import { TryCatch } from "../utils/tryCatch.js";
 import ErrorHandler from "../utils/utility-class.js";
-export const CreateNewCoupon = TryCatch(async (req, res, next) => {
-    const coupon = await Coupon.findOne({ code: req.body.code });
-    if (coupon)
-        return next(new ErrorHandler("Coupon Code already exists", 409));
-    const newCoupon = await Coupon.create(req.body);
-    invalidateCache({ coupon: true });
-    return res.status(200).json({
-        success: true,
-        message: "Coupon created successfully!",
-        newCoupon,
-    });
+import { config } from "dotenv";
+import { myCache } from "../app.js";
+import createOrder from "../utils/createOrder.js";
+import { updateStock } from "../utils/updateStock.js";
+config({
+    path: "./.env",
 });
-export const checkCouponValidity = TryCatch(async (req, res, next) => {
-    const { couponId: id } = req.params;
-    const key = `coupon-${id}`;
-    let coupon;
-    if (myCache.has(key)) {
-        coupon = JSON.parse(myCache.get(key));
-    }
-    else {
-        coupon = await Coupon.findById(id);
+const KHALTI = process.env.KHALTI_URL;
+const axiosRequestConfig = {
+    headers: {
+        Authorization: `Key ${process.env.KHALTI_SECRET_KEY}`,
+        "Content-Type": "application/json",
+    },
+};
+export const InitiatePayment = TryCatch(async (req, res, next) => {
+    const { shippingInfo, orderedItems, couponCode, total } = req.body;
+    let discount = 0, totalAmount;
+    const authReq = req;
+    if (!shippingInfo || !orderedItems || !total)
+        return next(new ErrorHandler("Incomplete Data", 400));
+    if (couponCode) {
+        const coupon = (await Coupon.findOne({ code: couponCode }));
         if (!coupon)
-            return next(new ErrorHandler("Coupon not found", 404));
-        const isReedemAvailable = coupon?.availableRedemptionCount > 0;
-        const isExipred = coupon.expiresAt.getTime() < Date.now();
-        if (!isReedemAvailable || isExipred)
-            return next(new ErrorHandler("Coupon validation failed", 400));
-        myCache.set(key, JSON.stringify(coupon));
+            return next(new ErrorHandler("Invalid coupon Code", 400));
+        const isReedemAvailable = coupon?.availableRedemptionCount > 0 &&
+            coupon?.expiresAt.getTime() > Date.now();
+        if (!isReedemAvailable)
+            return next(new ErrorHandler("Coupon expired or reached  maximum redeemption", 400));
+        discount = coupon.discountedAmount;
+        coupon.availableRedemptionCount -= 1;
+        await coupon.save();
     }
-    return res.status(200).json({
-        success: true,
-        message: "Coupon is valid and can be used",
-        discountAmount: coupon.discountedAmount,
+    const isOrderedItemsInStock = await Promise.all(orderedItems.map(async (item) => {
+        const product = await Product.findById(item._id);
+        return product;
+    }));
+    if (isOrderedItemsInStock.includes(null))
+        return next(new ErrorHandler("Product not found in the system", 400));
+    if (discount)
+        totalAmount = total - discount;
+    else
+        totalAmount = total;
+    const purchaseId = uuidv4();
+    myCache.set(purchaseId, JSON.stringify(req.body));
+    const paymentData = {
+        return_url: `${process.env.DOMAIN}/payment-callback`,
+        website_url: process.env.DOMAIN,
+        amount: totalAmount * 100,
+        customer_info: {
+            name: authReq.user?.uid,
+        },
+        purchase_order_id: purchaseId,
+        purchase_order_name: "DotEcomPurchase",
+    };
+    const { data } = await axios.post(`${KHALTI}/epayment/initiate/`, paymentData, axiosRequestConfig);
+    myCache.set(data.pidx, JSON.stringify(req.body));
+    return res.json({
+        paymentUrl: data.payment_url,
+        pidx: data.pidx,
+        purchaseId,
     });
 });
-export const getAllCoupons = TryCatch(async (req, res, next) => {
-    const key = "all-coupons";
-    let coupons;
-    if (myCache.has(key)) {
-        coupons = JSON.parse(myCache.get(key));
+export const VerifyPayment = TryCatch(async (req, res, next) => {
+    const { pidx: initialPidx } = req.body;
+    if (!initialPidx)
+        return next(new ErrorHandler("pidx required", 400));
+    const authReq = req;
+    const response = await axios.post(`${KHALTI}/epayment/lookup/`, { pidx: initialPidx }, axiosRequestConfig);
+    const { status, pidx: verifiedPidx } = response.data;
+    if (status === "Failed")
+        return next(new ErrorHandler("Payment failed!", 500));
+    if (status === "Completed") {
+        if (initialPidx !== verifiedPidx) {
+            myCache.del(initialPidx);
+            return next(new ErrorHandler("Invalid purchase Id", 400));
+        }
+        if (myCache.has(initialPidx)) {
+            const order = JSON.parse(myCache.get((initialPidx)));
+            order.orderedBy = authReq?.user?.uid;
+            await createOrder(order);
+            await updateStock(order.orderedItems, "decrease");
+            myCache.del(initialPidx);
+            return res.status(200).json({
+                success: true,
+                message: "Order created Successfully!",
+                order,
+            });
+        }
+        else
+            return next(new ErrorHandler("No order found", 404));
     }
     else {
-        coupons = await Coupon.find({});
-        if (coupons.length === 0)
-            return next(new ErrorHandler("Coupons not created yet", 404));
-        myCache.set(key, JSON.stringify(coupons));
+        myCache.del(initialPidx);
+        return next(new ErrorHandler("Something went wrong!Please Retry!", 500));
     }
-    return res.status(200).json({
-        success: true,
-        coupons,
-    });
-});
-export const deleteCoupon = TryCatch(async (req, res, next) => {
-    const { id } = req.params;
-    const coupon = await Coupon.findByIdAndDelete(id);
-    if (!coupon)
-        return next(new ErrorHandler("Coupon not found", 404));
-    invalidateCache({ coupon: true, couponCode: coupon.code });
-    return res.status(200).json({
-        success: true,
-        message: `Coupon ${coupon.code} deleted successfully`,
-    });
 });

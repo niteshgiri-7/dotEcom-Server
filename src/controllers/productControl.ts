@@ -16,7 +16,6 @@ export const addNewProduct = TryCatch(
     res: Response,
     next: NextFunction
   ) => {
-    console.log("from controller", req.body);
     const imageReq = req as IUploadImageRequest;
     const {category, name, price, stock } = req.body;
 
@@ -131,7 +130,6 @@ export const updateProduct = TryCatch(
       {new:true, runValidators: true }
     );
      invalidateCache({ product: true ,admin:true});
-    console.log("sending response")
     return res.status(200).json({
       success: true,
       message: `Product ${product._id} successfully updated`,

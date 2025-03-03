@@ -15,14 +15,12 @@ export const authenticateUser = TryCatch(async (req: IAuthRequest, res, next) =>
   const decodedToken: DecodedIdToken = await admin.auth().verifyIdToken(token);
 
   req.user = decodedToken as ICustomDecodedIdToken;
-
   next();
 });
 
 export const ensureAdminOnlyAccess = TryCatch(async (req: IAuthRequest, res, next) => {
    
   const { role } = req.user!;
-
   if (role !== "admin")
     return next(new ErrorHandler("Admin only Access\n Access Denied", 401));
 

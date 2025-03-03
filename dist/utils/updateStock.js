@@ -4,8 +4,7 @@ export const updateStock = async (orderedItems, operation) => {
     try {
         for (let i = 0; i < orderedItems.length; i++) {
             const order = orderedItems[i];
-            const product = await Product.findById(order.productId);
-            console.log(product);
+            const product = await Product.findById(order._id);
             if (!product)
                 throw new Error("product not found");
             if (operation === "decrease")

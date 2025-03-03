@@ -5,7 +5,6 @@ import { Product } from "../models/product.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import ErrorHandler from "../utils/utility-class.js";
 export const addNewProduct = TryCatch(async (req, res, next) => {
-    console.log("from controller", req.body);
     const imageReq = req;
     const { category, name, price, stock } = req.body;
     if (!req.file)
@@ -90,7 +89,6 @@ export const updateProduct = TryCatch(async (req, res, next) => {
     }
     const updatedProduct = await Product.findByIdAndUpdate(id, { $set: updatedFields }, { new: true, runValidators: true });
     invalidateCache({ product: true, admin: true });
-    console.log("sending response");
     return res.status(200).json({
         success: true,
         message: `Product ${product._id} successfully updated`,
