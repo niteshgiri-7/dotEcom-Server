@@ -2,3 +2,4 @@
 node_modules/
 uploads/
 firebaseAdminService.json
+.vercel

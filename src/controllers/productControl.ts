@@ -63,7 +63,7 @@ export const getAllProducts = TryCatch(
       myCache.set("all-products", JSON.stringify(Products));
     }
 
-    return res.status(200).json({ success: true, Products });
+    return res.status(200).json({ success: true, Products ,message:"wait bro"});
   }
 );
 
