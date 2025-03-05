@@ -43,7 +43,7 @@ export type ShippingInfoType = {
 };
 export interface OrderType extends Document {
   shippingInfo: ShippingInfoType;
-  status?: "pending payment" | "processing" | "shipped" | "delivered";
+  status?:  "processing" | "shipped" | "delivered";
   orderedBy: string;
   discount?: number | null;
   total: number;

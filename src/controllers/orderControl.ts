@@ -20,7 +20,7 @@ export const getMyOrders = TryCatch(async (req:IAuthRequest, res, next) => {
     orders = JSON.parse(myCache.get(ordersKey) as string);
   }
   else {
-    orders = await Order.find({ orderedBy: userId });
+    orders = await Order.find({ orderedBy: userId }).select("-shippingInfo -updatedAt -orderedBy");
     if (orders.length === 0)
       return next(new ErrorHandler("You have not placed any orders yet", 404));
     myCache.set(ordersKey, JSON.stringify(orders));
@@ -60,9 +60,6 @@ export const processOrder = TryCatch(async (req:IAuthRequest, res, next) => {
   if (!order) return next(new ErrorHandler("order not found", 404));
 
   switch (order.status) {
-    case "pending payment":
-      order.status = "processing";
-      break;
     case "processing":
       order.status = "shipped";
       break;
@@ -91,7 +88,6 @@ export const cancelOrder = TryCatch(async (req:IAuthRequest, res, next) => {
 
   const order = await Order.findById(orderId);
   if (!order) return next(new ErrorHandler("Order not found", 404));
-
   if (order.orderedBy !== userId)
     return res.status(401).json({
       success: false,
