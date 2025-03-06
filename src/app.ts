@@ -30,13 +30,16 @@ const URL:string = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL as 
 connectDB(URL);
 
 const corsOption:CorsOptions={
-  origin:process.env.DOMAIN,
+  origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
   methods:["GET","POST","PUT","DELETE","OPTIONS"],
   allowedHeaders:["Content-Type","Authorization"],
   credentials:true,
 }
 
+console.log("corsOption",corsOption);
+
 app.use(cors(corsOption));
+
 
 app.use(express.json());
 app.use(express.urlencoded({extended:true}))
