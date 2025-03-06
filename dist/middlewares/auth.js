@@ -2,10 +2,10 @@ import admin from "../config/firebase.js";
 import { TryCatch } from "../utils/tryCatch.js";
 import ErrorHandler from "../utils/utility-class.js";
 export const authenticateUser = TryCatch(async (req, res, next) => {
-    const authHeader = req.headers.authorization;
-    if (!authHeader || !authHeader.startsWith("Bearer"))
-        return next(new ErrorHandler("Unauthorized", 401));
-    const token = authHeader.split(" ")[1];
+    console.log("reqcookies", req.cookies);
+    const token = req.cookies["token"];
+    if (!token)
+        return next(new ErrorHandler("Unauthorized,No token provided", 401));
     const decodedToken = await admin.auth().verifyIdToken(token);
     req.user = decodedToken;
     next();

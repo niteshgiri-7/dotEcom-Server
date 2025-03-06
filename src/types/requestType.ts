@@ -74,7 +74,7 @@ export interface IUploadImageRequest extends Request{
   fileUpload?:{
     imageUrl:string;
     publicId:string;
-  }
+  },
 }
 
 

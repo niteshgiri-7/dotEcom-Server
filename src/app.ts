@@ -16,13 +16,17 @@ import statsRoute from "./routes/statsRoute.js";
 
 import couponRoute from "./routes/couponRoute.js";
 import paymentRoute from "./routes/paymentRoute.js";
+import cookieParser from "cookie-parser";
 
 config({
   path:"./.env"
 });
 
 const app = express();
-export const myCache = new NodeCache();
+export const myCache = new NodeCache({
+  stdTTL:300,
+  checkperiod:150
+});
 
 const port = process.env.PORT ||8080;
 const URL:string = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL as string;
@@ -42,6 +46,7 @@ app.use(cors(corsOption));
 
 
 app.use(express.json());
+app.use(cookieParser());
 app.use(express.urlencoded({extended:true}))
 app.use(morgan("tiny"));
 

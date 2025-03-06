@@ -1,20 +1,35 @@
-import { Request, Response, NextFunction } from "express";
-import { TryCatch } from "../utils/tryCatch.js";
-import ErrorHandler from "../utils/utility-class.js";
+import { NextFunction, Request, Response } from "express";
+import admin from "../config/firebase.js";
 import { User } from "../models/user.js";
 import {
   IUploadImageRequest,
   NewUserRequestBody,
 } from "../types/requestType.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
-import admin from "../config/firebase.js";
+import { TryCatch } from "../utils/tryCatch.js";
+import ErrorHandler from "../utils/utility-class.js";
 
 export const signUp = TryCatch(
   async (
     req: Request<object, object, NewUserRequestBody>,
     res: Response,
-  ): Promise<void> => {
-    const newUserImage = req as IUploadImageRequest;
+    next: NextFunction
+  ) => {
+    const newUserImageReq = req as IUploadImageRequest;
+
+    const authHeader = req.headers["authorization"];
+
+    const token = authHeader?.startsWith("Bearer")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token)
+      return next(
+        new ErrorHandler("No token provided in Authorization Header", 400)
+      );
+
+     await admin.auth().verifyIdToken(token);
+
     const {
       uid,
       name,
@@ -25,9 +40,9 @@ export const signUp = TryCatch(
     } = req.body;
 
     const isAdminThereInSystem = await User.exists({ role: "admin" });
-    
+
     if (isAdminThereInSystem && roleOfNewPersonInReqBody === "admin")
-      throw new ErrorHandler("can't signup, admin already exists",401);
+      throw new ErrorHandler("can't signup, admin already exists", 401);
 
     const user = await User.create({
       _id: uid,
@@ -37,8 +52,8 @@ export const signUp = TryCatch(
       DOB,
       role: roleOfNewPersonInReqBody,
       photo: {
-        secure_url: newUserImage.fileUpload?.imageUrl,
-        public_id: newUserImage.fileUpload?.publicId,
+        secure_url: newUserImageReq.fileUpload?.imageUrl,
+        public_id: newUserImageReq.fileUpload?.publicId,
       },
     });
 
@@ -48,13 +63,69 @@ export const signUp = TryCatch(
 
     invalidateCache({ admin: true });
 
-    res.status(201).json({
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 1 * 60 * 60 * 1000,
+    });
+
+    return res.status(201).json({
       success: true,
       message: `Welcome ${req.body.name}`,
       user,
     });
   }
 );
+
+export const login = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader = req.headers["authorization"];
+
+    const token = authHeader?.startsWith("Bearer")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token)
+      return next(
+        new ErrorHandler("No auth token provided,Login Failed!", 400)
+      );
+
+    const decodedToken = await admin.auth().verifyIdToken(token);
+
+    const { uid } = decodedToken;
+
+    const user = await User.findOne({ _id: uid });
+
+    if (!user)
+      return next(
+        new ErrorHandler("User not found. Please signUp first.", 404)
+      );
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      maxAge: 1 * 60 * 60 * 1000,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Logged in Successfully",
+      user,
+    });
+  }
+);
+
+export const logOut = TryCatch(async(req:Request,res:Response)=>{
+  res.clearCookie("token",{
+    httpOnly:true,
+    sameSite:"strict",
+    secure:true,
+    maxAge:0
+  });
+  return res.status(200).json({message:"Logged Out Successfully!"});
+})
 
 export const getAllCustomers = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {

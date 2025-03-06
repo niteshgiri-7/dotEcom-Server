@@ -8,6 +8,7 @@ import { config } from "dotenv";
 import { myCache } from "../app.js";
 import createOrder from "../utils/createOrder.js";
 import { updateStock } from "../utils/updateStock.js";
+import { invalidateCache } from "../utils/invalidateCache.js";
 config({
     path: "./.env",
 });
@@ -86,6 +87,7 @@ export const VerifyPayment = TryCatch(async (req, res, next) => {
             await createOrder(order);
             await updateStock(order.orderedItems, "decrease");
             myCache.del(initialPidx);
+            invalidateCache({ admin: true, order: true });
             return res.status(200).json({
                 success: true,
                 message: "Order created Successfully!",
