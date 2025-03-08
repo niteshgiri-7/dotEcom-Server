@@ -71,13 +71,14 @@ export const processOrder = TryCatch(async (req:IAuthRequest, res, next) => {
       break;
   }
 
-  await order.save();
+ const updatedOrder=  await order.save();
 
   invalidateCache({ admin: true, order: true, userId: id });
 
   return res.status(200).json({
     success: true,
     message: "Order processed successfully",
+    status:updatedOrder.status,
   });
 });
 

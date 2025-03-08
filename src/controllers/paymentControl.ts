@@ -125,6 +125,8 @@ export const VerifyPayment = TryCatch(
 
     const authReq = req as IAuthRequest;
 
+    const userId = authReq.user?.uid as string;
+
     const response = await axios.post<IPaymentLookupResponse>(
       `${KHALTI}/epayment/lookup/`,
       { pidx:initialPidx },
@@ -143,12 +145,12 @@ export const VerifyPayment = TryCatch(
 
       if (myCache.has(initialPidx)) {
         const order: IinitiatePaymentRequestBody = JSON.parse(myCache.get((initialPidx))!);
-        order.orderedBy = authReq?.user?.uid as string;
+        order.orderedBy = userId;
         await createOrder(order);
         await updateStock(order.orderedItems, "decrease");
         myCache.del(initialPidx);
         
-        invalidateCache({admin:true,order:true});
+        invalidateCache({ order: true, admin: true, userId  });
 
         return res.status(200).json({
           success: true,

@@ -35,12 +35,12 @@ connectDB(URL);
 
 const corsOption:CorsOptions={
   origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
-  methods:["GET","POST","PUT","DELETE","OPTIONS"],
+  methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
   allowedHeaders:["Content-Type","Authorization"],
   credentials:true,
 }
 
-console.log("corsOption",corsOption);
+
 
 app.use(cors(corsOption));
 

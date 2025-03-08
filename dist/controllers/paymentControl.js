@@ -72,6 +72,7 @@ export const VerifyPayment = TryCatch(async (req, res, next) => {
     if (!initialPidx)
         return next(new ErrorHandler("pidx required", 400));
     const authReq = req;
+    const userId = authReq.user?.uid;
     const response = await axios.post(`${KHALTI}/epayment/lookup/`, { pidx: initialPidx }, axiosRequestConfig);
     const { status, pidx: verifiedPidx } = response.data;
     if (status === "Failed")
@@ -83,11 +84,11 @@ export const VerifyPayment = TryCatch(async (req, res, next) => {
         }
         if (myCache.has(initialPidx)) {
             const order = JSON.parse(myCache.get((initialPidx)));
-            order.orderedBy = authReq?.user?.uid;
+            order.orderedBy = userId;
             await createOrder(order);
             await updateStock(order.orderedItems, "decrease");
             myCache.del(initialPidx);
-            invalidateCache({ admin: true, order: true });
+            invalidateCache({ order: true, admin: true, userId });
             return res.status(200).json({
                 success: true,
                 message: "Order created Successfully!",

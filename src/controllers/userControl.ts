@@ -1,13 +1,16 @@
-import { NextFunction, Request, Response } from "express";
+import { CookieOptions, NextFunction, Request, Response } from "express";
 import admin from "../config/firebase.js";
 import { User } from "../models/user.js";
 import {
+  IAuthRequest,
+  ICustomDecodedIdToken,
   IUploadImageRequest,
   NewUserRequestBody,
 } from "../types/requestType.js";
 import { invalidateCache } from "../utils/invalidateCache.js";
 import { TryCatch } from "../utils/tryCatch.js";
 import ErrorHandler from "../utils/utility-class.js";
+import { DecodedIdToken } from "firebase-admin/auth";
 
 export const signUp = TryCatch(
   async (
@@ -28,7 +31,7 @@ export const signUp = TryCatch(
         new ErrorHandler("No token provided in Authorization Header", 400)
       );
 
-     await admin.auth().verifyIdToken(token);
+    await admin.auth().verifyIdToken(token);
 
     const {
       uid,
@@ -81,7 +84,8 @@ export const signUp = TryCatch(
 export const login = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers["authorization"];
-
+    const { rememberMe }: { rememberMe: boolean } = req.body;
+    console.log("rememberMe", rememberMe);
     const token = authHeader?.startsWith("Bearer")
       ? authHeader.split(" ")[1]
       : null;
@@ -102,12 +106,15 @@ export const login = TryCatch(
         new ErrorHandler("User not found. Please signUp first.", 404)
       );
 
-    res.cookie("token", token, {
+    const cookieOption: CookieOptions = {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
-      maxAge: 1 * 60 * 60 * 1000,
-    });
+    };
+
+    if (rememberMe) cookieOption.maxAge = 7 * 24 * 60 * 60 * 10000;
+
+    res.cookie("token", token, cookieOption);
 
     return res.status(200).json({
       success: true,
@@ -117,15 +124,66 @@ export const login = TryCatch(
   }
 );
 
-export const logOut = TryCatch(async(req:Request,res:Response)=>{
-  res.clearCookie("token",{
-    httpOnly:true,
-    sameSite:"strict",
-    secure:true,
-    maxAge:0
+export const logOut = TryCatch(async (req: Request, res: Response) => {
+  res.clearCookie("token", {
+    httpOnly: true,
+    sameSite: "strict",
+    secure: true,
   });
-  return res.status(200).json({message:"Logged Out Successfully!"});
-})
+  return res.status(200).json({ message: "Logged Out Successfully!" });
+});
+
+export const refreshToken = TryCatch(
+  async (req: Request, res: Response, next: NextFunction) => {
+    const authHeader: string | undefined = req.headers["authorization"];
+    const rememberMe: boolean = req.body["rememberMe"];
+    console.log("rememberMe", rememberMe);
+    const token = authHeader?.startsWith("Bearer")
+      ? authHeader.split(" ")[1]
+      : null;
+
+    if (!token) return next(new ErrorHandler("No auth token provided", 400));
+
+    const { uid } = await admin.auth().verifyIdToken(token);
+
+    const user = await User.findOne({ _id: uid });
+
+    if (!user) return next(new ErrorHandler("No user found", 404));
+
+    const cookieOption: CookieOptions = {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    };
+
+    if (rememberMe) cookieOption.maxAge = 7 * 24 * 60 * 60 * 10000;
+
+    res.cookie("token", token, cookieOption);
+    return res.status(200).json({
+      success: true,
+      message: "Token refreshed successfully",
+    });
+  }
+);
+
+export const checkAuth = TryCatch(async (req: IAuthRequest, res, next) => {
+  const token = req.cookies["token"];
+
+  if (!token)
+    return next(new ErrorHandler("No token provided,unauthorized!", 401));
+
+  const decodedToken: DecodedIdToken = await admin.auth().verifyIdToken(token);
+
+  const {role} = decodedToken as ICustomDecodedIdToken;
+
+
+  return res.status(200).json({
+    success: true,
+    message: "User Verified",
+    isAuthenticated:true,
+    role,
+  });
+});
 
 export const getAllCustomers = TryCatch(
   async (req: Request, res: Response, next: NextFunction) => {
