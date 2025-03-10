@@ -69,7 +69,7 @@ export const signUp = TryCatch(
     res.cookie("token", token, {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
       maxAge: 1 * 60 * 60 * 1000,
     });
 
@@ -109,7 +109,7 @@ export const login = TryCatch(
     const cookieOption: CookieOptions = {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
     };
 
     if (rememberMe) cookieOption.maxAge = 7 * 24 * 60 * 60 * 10000;
@@ -127,7 +127,7 @@ export const login = TryCatch(
 export const logOut = TryCatch(async (req: Request, res: Response) => {
   res.clearCookie("token", {
     httpOnly: true,
-    sameSite: "strict",
+    sameSite: "none",
     secure: true,
   });
   return res.status(200).json({ message: "Logged Out Successfully!" });
@@ -153,7 +153,7 @@ export const refreshToken = TryCatch(
     const cookieOption: CookieOptions = {
       httpOnly: true,
       secure: true,
-      sameSite: "strict",
+      sameSite: "none",
     };
 
     if (rememberMe) cookieOption.maxAge = 7 * 24 * 60 * 60 * 10000;
