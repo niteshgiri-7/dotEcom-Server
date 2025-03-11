@@ -24,6 +24,7 @@ export const myCache = new NodeCache({
 });
 const port = process.env.PORT || 8080;
 const URL = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL;
+const cssUrlForSwagger = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 connectDB(URL);
 const corsOption = {
     origin: [process.env.DOMAIN, process.env.DOMAIN2],
@@ -36,7 +37,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
-app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec, { customCssUrl: cssUrlForSwagger }));
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/order", orderRoute);
