@@ -124,6 +124,7 @@ export const login = TryCatch(
   }
 );
 
+
 export const logOut = TryCatch(async (req: Request, res: Response) => {
   res.clearCookie("token", {
     httpOnly: true,
@@ -174,13 +175,12 @@ export const checkAuth = TryCatch(async (req: IAuthRequest, res, next) => {
 
   const decodedToken: DecodedIdToken = await admin.auth().verifyIdToken(token);
 
-  const {role} = decodedToken as ICustomDecodedIdToken;
-
+  const { role } = decodedToken as ICustomDecodedIdToken;
 
   return res.status(200).json({
     success: true,
     message: "User Verified",
-    isAuthenticated:true,
+    isAuthenticated: true,
     role,
   });
 });

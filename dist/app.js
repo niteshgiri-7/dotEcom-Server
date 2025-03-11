@@ -2,6 +2,7 @@ import express from "express";
 import NodeCache from "node-cache";
 import cors from "cors";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
 import { config } from "dotenv";
 import connectDB from "./utils/db.js";
 import errorMiddleWare from "./middlewares/errorMiddleWare.js";
@@ -12,6 +13,7 @@ import statsRoute from "./routes/statsRoute.js";
 import couponRoute from "./routes/couponRoute.js";
 import paymentRoute from "./routes/paymentRoute.js";
 import cookieParser from "cookie-parser";
+import swaggerSpec from "./swagger.js";
 config({
     path: "./.env"
 });
@@ -34,6 +36,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
+app.use('/api/v1/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/products", productRoute);
 app.use("/api/v1/order", orderRoute);

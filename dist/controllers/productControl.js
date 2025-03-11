@@ -44,7 +44,7 @@ export const getAllProducts = TryCatch(async (req, res, next) => {
             return next(new ErrorHandler("No Products Found", 404));
         myCache.set("all-products", JSON.stringify(Products));
     }
-    return res.status(200).json({ success: true, Products, message: "wait bro" });
+    return res.status(200).json({ success: true, Products, message: "successfully retrieved all products" });
 });
 export const getProductDetails = TryCatch(async (req, res, next) => {
     const { productId: id } = req.params;
