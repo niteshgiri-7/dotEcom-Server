@@ -1,6 +1,6 @@
 import express from "express";
 import NodeCache from "node-cache";
-import cors,{CorsOptions} from "cors";
+import cors from "cors";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 
