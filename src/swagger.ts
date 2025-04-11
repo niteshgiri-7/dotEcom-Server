@@ -82,3 +82,23 @@ const options: Options = {
 const swaggerSpec = swaggerJSDoc(options);
 
 export default swaggerSpec;
+
+
+interface Car  {
+  price:string;
+  model:string;
+ }
+
+const printModel =(car:Car)=>{
+ console.log(car.model);
+}
+
+
+
+const ferari = {
+  price:"100",
+  model:"ferari2025",
+  manafacturer:"NiteshCompany"
+}
+
+printModel(ferari)

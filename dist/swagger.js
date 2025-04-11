@@ -78,3 +78,12 @@ const options = {
 };
 const swaggerSpec = swaggerJSDoc(options);
 export default swaggerSpec;
+const printModel = (car) => {
+    console.log(car.model);
+};
+const ferari = {
+    price: "100",
+    model: "ferari2025",
+    manafacturer: "NiteshCompany"
+};
+printModel(ferari);

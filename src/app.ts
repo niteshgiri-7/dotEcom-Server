@@ -37,16 +37,16 @@ const cssUrlForSwagger =
 
 connectDB(URL);
 
-const corsOption:CorsOptions={
-  origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
-  methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
-  allowedHeaders:["Content-Type","Authorization"],
-  credentials:true,
-}
+// const corsOption:CorsOptions={
+//   origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
+//   methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
+//   allowedHeaders:["Content-Type","Authorization"],
+//   credentials:true,
+// }
 
 
 
-app.use(cors(corsOption));
+app.use(cors());
 
 
 app.use(express.json());
