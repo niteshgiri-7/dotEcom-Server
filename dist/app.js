@@ -26,13 +26,13 @@ const port = process.env.PORT || 8080;
 const URL = process.env.PRODUCTION_DB_URL || process.env.LOCAL_DB_URL;
 const cssUrlForSwagger = "https://cdnjs.cloudflare.com/ajax/libs/swagger-ui/4.1.0/swagger-ui.min.css";
 connectDB(URL);
-// const corsOption:CorsOptions={
-//   origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
-//   methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
-//   allowedHeaders:["Content-Type","Authorization"],
-//   credentials:true,
-// }
-app.use(cors());
+const corsOption = {
+    origin: [process.env.DOMAIN, process.env.DOMAIN2],
+    methods: ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    credentials: true,
+};
+app.use(cors(corsOption));
 app.use(express.json());
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: true }));

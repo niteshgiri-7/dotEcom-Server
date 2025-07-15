@@ -1,6 +1,6 @@
 import express from "express";
 import NodeCache from "node-cache";
-import cors from "cors";
+import cors, { CorsOptions } from "cors";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 
@@ -37,16 +37,16 @@ const cssUrlForSwagger =
 
 connectDB(URL);
 
-// const corsOption:CorsOptions={
-//   origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
-//   methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
-//   allowedHeaders:["Content-Type","Authorization"],
-//   credentials:true,
-// }
+const corsOption:CorsOptions={
+  origin:[process.env.DOMAIN,process.env.DOMAIN2] as string[],
+  methods:["GET","POST","PUT","DELETE","PATCH","OPTIONS"],
+  allowedHeaders:["Content-Type","Authorization"],
+  credentials:true,
+}
 
 
 
-app.use(cors());
+app.use(cors(corsOption));
 
 
 app.use(express.json());
